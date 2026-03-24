@@ -21,6 +21,7 @@ const TransactionForm = ({ onSuccess, transaction }: Props) => {
     const [amount, setAmount] = useState("");
     const [category, setCategory] = useState("");
     const [type, setType] = useState<"income" | "expense">("expense");
+    const [description, setDescription] = useState("");
 
     // ✅ Prefill when editing
     useEffect(() => {
@@ -28,11 +29,13 @@ const TransactionForm = ({ onSuccess, transaction }: Props) => {
             setAmount(transaction.amount.toString());
             setCategory(transaction.category);
             setType(transaction.type);
+            setDescription(transaction.description || "");
         } else {
             // reset when switching to add mode
             setAmount("");
             setCategory("");
             setType("expense");
+            setDescription("");
         }
     }, [transaction]);
 
@@ -47,12 +50,14 @@ const TransactionForm = ({ onSuccess, transaction }: Props) => {
                     amount: Number(amount),
                     category,
                     type,
+                    description,
                 });
             } else {
                 await create({
                     amount: Number(amount),
                     category,
                     type,
+                    description,
                 });
             }
 
@@ -60,6 +65,7 @@ const TransactionForm = ({ onSuccess, transaction }: Props) => {
             setAmount("");
             setCategory("");
             setType("expense");
+            setDescription("");
 
             onSuccess();
 
@@ -71,14 +77,14 @@ const TransactionForm = ({ onSuccess, transaction }: Props) => {
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
 
-            <h2 className="text-xl font-bold">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                 {isEdit ? "Edit Transaction" : "Add Transaction"}
             </h2>
 
             <input
                 type="number"
                 placeholder="Amount"
-                className="w-full border p-3 rounded-lg"
+                className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
             />
@@ -86,13 +92,13 @@ const TransactionForm = ({ onSuccess, transaction }: Props) => {
             <input
                 type="text"
                 placeholder="Category"
-                className="w-full border p-3 rounded-lg"
+                className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
             />
 
             <select
-                className="w-full border p-3 rounded-lg"
+                className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 value={type}
                 onChange={(e) =>
                     setType(e.target.value as "income" | "expense")
@@ -102,10 +108,18 @@ const TransactionForm = ({ onSuccess, transaction }: Props) => {
                 <option value="income">Income</option>
             </select>
 
+            <input
+                type="text"
+                placeholder="Description (optional)"
+                className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+            />
+
             <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-indigo-600 text-white py-3 rounded-lg disabled:opacity-50"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg disabled:opacity-50"
             >
                 {loading
                     ? "Processing..."

@@ -1,57 +1,62 @@
 import Layout from "../components/Layout";
 import AnalyticsChart from "../components/AnalyticsChart";
+import CategoryBreakdown from "../components/CategoryBreakdown";
+import WeeklyComparison from "../components/WeeklyComparison";
+import SpendingTrend from "../components/SpendingTrend";
+import SummaryStats from "../components/SummaryStats";
 import { useAnalytics } from "../hooks/useAnalytics";
 import { useState } from "react";
+import { useAppearance } from "../context/AppearanceContext";
 
-const ranges = [
-    { label: "7 Days", value: "7d" },
-    { label: "1 Month", value: "1m" },
-    { label: "3 Months", value: "3m" },
-    { label: "6 Months", value: "6m" },
-    { label: "1 Year", value: "1y" },
-];
+const RANGE_KEYS: Record<string, string> = {
+    "7d": "range_7d", "1m": "range_1m", "3m": "range_3m", "6m": "range_6m", "1y": "range_1y",
+};
+const RANGE_VALUES = ["7d", "1m", "3m", "6m", "1y"];
 
 const Analytics = () => {
     const [range, setRange] = useState("7d");
     const { data, loading } = useAnalytics(range);
+    const { t } = useAppearance();
 
     return (
         <Layout>
             <div className="space-y-6">
-
-                {/* HEADER */}
                 <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-2xl font-bold">Analytics</h1>
-                        <p className="text-gray-500">
-                            Deep dive into your spending patterns
-                        </p>
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("analytics")}</h1>
+                        <p className="text-gray-500 dark:text-gray-400">{t("deep_dive")}</p>
                     </div>
-
-                    {/* RANGE FILTER */}
                     <div className="flex gap-2">
-                        {ranges.map((r) => (
+                        {RANGE_VALUES.map((v) => (
                             <button
-                                key={r.value}
-                                onClick={() => setRange(r.value)}
-                                className={`px-4 py-2 rounded-lg border ${
-                                    range === r.value
-                                        ? "bg-indigo-600 text-white"
-                                        : ""
+                                key={v}
+                                onClick={() => setRange(v)}
+                                className={`px-4 py-2 rounded-lg border dark:border-gray-600 transition-colors ${
+                                    range === v
+                                        ? "bg-indigo-600 text-white border-indigo-600"
+                                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                                 }`}
                             >
-                                {r.label}
+                                {t(RANGE_KEYS[v])}
                             </button>
                         ))}
                     </div>
                 </div>
 
-                {/* CHART */}
+                <SummaryStats />
+
                 {loading ? (
-                    <div>Loading...</div>
+                    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 text-gray-400">Loading...</div>
                 ) : (
                     <AnalyticsChart data={data || []} />
                 )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <CategoryBreakdown />
+                    <WeeklyComparison />
+                </div>
+
+                <SpendingTrend />
             </div>
         </Layout>
     );

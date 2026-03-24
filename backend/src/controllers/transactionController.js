@@ -3,13 +3,14 @@ import Transaction from "../models/Transaction.js";
 // CREATE TRANSACTION
 export const createTransaction = async (req, res) => {
     try {
-        const { amount, category, type } = req.body;
+        const { amount, category, type, description } = req.body;
 
         const transaction = await Transaction.create({
             user: req.user._id,
             amount,
             category,
             type,
+            description: description || "",
         });
 
         res.status(201).json(transaction);
@@ -30,9 +31,12 @@ export const getTransactions = async (req, res) => {
 
         let query = { user: req.user._id };
 
-        // 🔍 SEARCH (category text)
+        // 🔍 SEARCH (category or description)
         if (search) {
-            query.category = { $regex: search, $options: "i" };
+            query.$or = [
+                { category: { $regex: search, $options: "i" } },
+                { description: { $regex: search, $options: "i" } },
+            ];
         }
 
         // 📊 TYPE FILTER
@@ -68,7 +72,7 @@ export const getTransactions = async (req, res) => {
 export const updateTransaction = async (req, res) => {
     try {
         const { id } = req.params;
-        const { amount, category, type, date } = req.body;
+        const { amount, category, type, date, description } = req.body;
 
         // Find transaction
         const transaction = await Transaction.findById(id);
@@ -87,6 +91,7 @@ export const updateTransaction = async (req, res) => {
         transaction.category = category ?? transaction.category;
         transaction.type = type ?? transaction.type;
         transaction.date = date ?? transaction.date;
+        transaction.description = description ?? transaction.description;
 
         const updatedTransaction = await transaction.save();
 

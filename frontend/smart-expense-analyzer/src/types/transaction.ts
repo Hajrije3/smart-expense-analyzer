@@ -4,4 +4,5 @@ export interface Transaction {
     category: string;
     type: "income" | "expense";
     date: string;
+    description?: string;
 }

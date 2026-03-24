@@ -73,6 +73,7 @@ export const useCreateTransaction = () => {
         amount: number;
         category: string;
         type: "income" | "expense";
+        description?: string;
     }) => {
         try {
             setLoading(true);
@@ -106,6 +107,7 @@ export const useUpdateTransaction = () => {
             amount?: number;
             category?: string;
             type?: "income" | "expense";
+            description?: string;
         }
     ) => {
         try {

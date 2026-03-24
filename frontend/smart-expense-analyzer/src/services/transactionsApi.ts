@@ -33,6 +33,7 @@ export const createTransaction = async (payload: {
     amount: number;
     category: string;
     type: "income" | "expense";
+    description?: string;
 }) => {
     const { data } = await API.post("/transactions", payload);
     return data;
@@ -44,6 +45,7 @@ export const updateTransaction = async (
         amount?: number;
         category?: string;
         type?: "income" | "expense";
+        description?: string;
     }
 ) => {
     const { data } = await API.put(`/transactions/${id}`, payload);
