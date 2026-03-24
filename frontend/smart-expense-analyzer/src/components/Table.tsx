@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 type Column<T> = {
     header: string;
     accessor: (row: T) => ReactNode;
+    width?: string; // 👈 allows custom column sizing
 };
 
 type TableProps<T> = {
@@ -20,6 +21,11 @@ const Table = <T,>({
                        pages,
                        onPageChange,
                    }: TableProps<T>) => {
+    // 🔥 dynamic grid template
+    const gridTemplate = columns
+        .map((col) => col.width || "1fr")
+        .join(" ");
+
     return (
         <div className="space-y-4">
 
@@ -27,7 +33,10 @@ const Table = <T,>({
             <div className="bg-white rounded-xl shadow overflow-hidden">
 
                 {/* HEADER */}
-                <div className="grid grid-cols-5 p-4 font-medium text-gray-500 border-b">
+                <div
+                    className="grid p-4 font-medium text-gray-500 border-b"
+                    style={{ gridTemplateColumns: gridTemplate }}
+                >
                     {columns.map((col, index) => (
                         <span key={index}>{col.header}</span>
                     ))}
@@ -38,10 +47,13 @@ const Table = <T,>({
                     {data.map((row, rowIndex) => (
                         <div
                             key={rowIndex}
-                            className="grid grid-cols-5 p-4 border-b items-center hover:bg-gray-50"
+                            className="grid p-4 border-b items-center hover:bg-gray-50"
+                            style={{ gridTemplateColumns: gridTemplate }}
                         >
                             {columns.map((col, colIndex) => (
-                                <span key={colIndex}>{col.accessor(row)}</span>
+                                <span key={colIndex} className="truncate">
+                                    {col.accessor(row)}
+                                </span>
                             ))}
                         </div>
                     ))}
@@ -61,8 +73,8 @@ const Table = <T,>({
                 </button>
 
                 <span className="text-sm text-gray-600">
-          Page {page} of {pages}
-        </span>
+                    Page {page} of {pages}
+                </span>
 
                 <button
                     onClick={() => onPageChange(page + 1)}

@@ -63,3 +63,63 @@ export const getTransactions = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+// UPDATE TRANSACTION
+export const updateTransaction = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { amount, category, type, date } = req.body;
+
+        // Find transaction
+        const transaction = await Transaction.findById(id);
+
+        if (!transaction) {
+            return res.status(404).json({ message: "Transaction not found" });
+        }
+
+        // Make sure user owns the transaction
+        if (transaction.user.toString() !== req.user._id.toString()) {
+            return res.status(401).json({ message: "Not authorized" });
+        }
+
+        // Update fields (only if provided)
+        transaction.amount = amount ?? transaction.amount;
+        transaction.category = category ?? transaction.category;
+        transaction.type = type ?? transaction.type;
+        transaction.date = date ?? transaction.date;
+
+        const updatedTransaction = await transaction.save();
+
+        res.json(updatedTransaction);
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// DELETE TRANSACTION
+export const deleteTransaction = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Find transaction first
+        const transaction = await Transaction.findById(id);
+
+        if (!transaction) {
+            return res.status(404).json({ message: "Transaction not found" });
+        }
+
+        // 🔐 Check ownership (VERY IMPORTANT)
+        if (transaction.user.toString() !== req.user._id.toString()) {
+            return res.status(401).json({ message: "Not authorized" });
+        }
+
+        // 🗑 Delete
+        await transaction.deleteOne();
+
+        res.json({ message: "Transaction deleted successfully" });
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

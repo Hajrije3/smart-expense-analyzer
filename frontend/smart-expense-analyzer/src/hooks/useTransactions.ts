@@ -1,12 +1,21 @@
 import { useEffect, useState } from "react";
-import { getTransactions } from "../services/transactionsApi";
+import {
+    getTransactions,
+    createTransaction,
+    updateTransaction, deleteTransaction,
+} from "../services/transactionsApi";
 import type { Transaction } from "../types/transaction";
 
+
+// ==============================
+// 📦 FETCH TRANSACTIONS
+// ==============================
 export const useTransactions = () => {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [page, setPage] = useState(1);
     const [pages, setPages] = useState(1);
     const [loading, setLoading] = useState(false);
+
     const [search, setSearch] = useState("");
     const [type, setType] = useState("all");
     const [category, setCategory] = useState("all");
@@ -20,6 +29,7 @@ export const useTransactions = () => {
                 type,
                 category,
             });
+
             setTransactions(data.transactions);
             setPages(data.pages);
             setPage(data.page);
@@ -47,5 +57,95 @@ export const useTransactions = () => {
         setType,
         category,
         setCategory,
+        refetch: fetchTransactions, // 🔁 important
     };
+};
+
+
+// ==============================
+// ➕ CREATE TRANSACTION
+// ==============================
+export const useCreateTransaction = () => {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<any>(null);
+
+    const create = async (payload: {
+        amount: number;
+        category: string;
+        type: "income" | "expense";
+    }) => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const data = await createTransaction(payload);
+            return data;
+
+        } catch (err) {
+            setError(err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return { create, loading, error };
+};
+
+
+// ==============================
+// ✏️ UPDATE TRANSACTION
+// ==============================
+export const useUpdateTransaction = () => {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<any>(null);
+
+    const update = async (
+        id: string,
+        payload: {
+            amount?: number;
+            category?: string;
+            type?: "income" | "expense";
+        }
+    ) => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const data = await updateTransaction(id, payload);
+            return data;
+
+        } catch (err) {
+            setError(err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return { update, loading, error };
+};
+
+
+export const useDeleteTransaction = () => {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<any>(null);
+
+    const remove = async (id: string) => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const data = await deleteTransaction(id);
+            return data;
+
+        } catch (err) {
+            setError(err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return { remove, loading, error };
 };

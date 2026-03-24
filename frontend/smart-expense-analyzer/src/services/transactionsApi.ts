@@ -37,3 +37,20 @@ export const createTransaction = async (payload: {
     const { data } = await API.post("/transactions", payload);
     return data;
 };
+
+export const updateTransaction = async (
+    id: string,
+    payload: {
+        amount?: number;
+        category?: string;
+        type?: "income" | "expense";
+    }
+) => {
+    const { data } = await API.put(`/transactions/${id}`, payload);
+    return data;
+};
+
+export const deleteTransaction = async (id: string) => {
+    const { data } = await API.delete(`/transactions/${id}`);
+    return data;
+};

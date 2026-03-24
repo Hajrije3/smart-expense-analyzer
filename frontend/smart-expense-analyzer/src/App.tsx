@@ -3,6 +3,7 @@ import Login from "./pages/Login.tsx";
 import ProtectedRoute from "./components/ProtectedRoutes.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Transactions from "./pages/Transactions.tsx";
+import Analytics from "./pages/Analytics.tsx";
 
 function App() {
     return (
@@ -24,6 +25,14 @@ function App() {
                 element={
                     <ProtectedRoute>
                         <Transactions/>
+                    </ProtectedRoute>
+                }
+                />
+                <Route
+                path={"/analytics"}
+                element={
+                    <ProtectedRoute>
+                        <Analytics/>
                     </ProtectedRoute>
                 }
                 />

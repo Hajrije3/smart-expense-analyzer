@@ -45,7 +45,16 @@ const Layout = ({ children }: { children: ReactNode }) => {
                         >
                             Transactions
                         </p>
-                        <p className="text-gray-600 cursor-pointer hover:text-indigo-600">Analytics</p>
+                        <p
+                            onClick={() => navigate("/analytics")}
+                            className={`cursor-pointer ${
+                                isActive("/analytics")
+                                    ? "text-indigo-600 font-medium"
+                                    : "text-gray-600 hover:text-indigo-600"
+                            }`}
+                        >
+                            Analytics
+                        </p>
                         <p className="text-gray-600 cursor-pointer hover:text-indigo-600">Budgets</p>
                         <p className="text-gray-600 cursor-pointer hover:text-indigo-600">Insights</p>
                         <p className="text-gray-600 cursor-pointer hover:text-indigo-600">Settings</p>
@@ -68,16 +77,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
             {/* MAIN */}
             <div className="flex-1 flex flex-col">
-
-                {/* TOPBAR */}
-                <div className="bg-white p-4 shadow flex justify-between items-center">
-                    <input
-                        placeholder="Search transactions..."
-                        className="border rounded-lg px-4 py-2 w-1/3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-
-                    <span className="text-xl">🔔</span>
-                </div>
 
                 {/* CONTENT */}
                 <div className="p-6 overflow-y-auto">
