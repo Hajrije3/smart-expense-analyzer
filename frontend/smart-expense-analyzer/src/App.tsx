@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppearanceProvider } from "./context/AppearanceContext";
 import Login from "./pages/Login.tsx";
+import Register from "./pages/Register.tsx";
 import ProtectedRoute from "./components/ProtectedRoutes.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import Transactions from "./pages/Transactions.tsx";
@@ -15,6 +16,7 @@ function App() {
         <BrowserRouter>
             <Routes>
                 <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
 
                 <Route
                     path="/"
