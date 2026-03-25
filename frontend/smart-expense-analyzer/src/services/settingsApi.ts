@@ -24,3 +24,19 @@ export const changePassword = async (currentPassword: string, newPassword: strin
 export const deleteAccount = async (password: string): Promise<void> => {
     await API.delete("/settings/account", { data: { password } });
 };
+
+export type NotificationPrefs = {
+    emailNotifications: boolean;
+    pushNotifications: boolean;
+    budgetAlerts: boolean;
+};
+
+export const getNotifications = async (): Promise<NotificationPrefs> => {
+    const { data } = await API.get("/settings/notifications");
+    return data;
+};
+
+export const updateNotifications = async (prefs: NotificationPrefs): Promise<NotificationPrefs> => {
+    const { data } = await API.put("/settings/notifications", prefs);
+    return data;
+};

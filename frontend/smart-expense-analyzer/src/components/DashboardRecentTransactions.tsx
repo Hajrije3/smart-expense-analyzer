@@ -76,7 +76,7 @@ const DashboardRecentTransactions = () => {
     }, []);
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 sm:p-6">
             <div className="flex items-center justify-between mb-1">
                 <h2 className="text-base font-bold text-gray-900 dark:text-white">Recent Transactions</h2>
                 <button

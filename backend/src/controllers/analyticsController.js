@@ -340,6 +340,57 @@ export const getDashboardStats = async (req, res) => {
     }
 };
 
+export const getPredictions = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const now = new Date();
+
+        // Fetch last 3 full months of expenses
+        const start = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+        const end   = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59); // end of last month
+
+        const transactions = await Transaction.find({
+            user: userId,
+            type: "expense",
+            date: { $gte: start, $lte: end },
+        });
+
+        // Group spending by category and by month index (0 = 3 months ago, 1 = 2 months ago, 2 = last month)
+        const categoryMonths = {};
+        transactions.forEach((tx) => {
+            const d = new Date(tx.date);
+            const monthsAgo = (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth()) - 1;
+            if (monthsAgo < 0 || monthsAgo > 2) return;
+            const idx = 2 - monthsAgo; // 0=oldest, 2=last month
+            if (!categoryMonths[tx.category]) categoryMonths[tx.category] = [0, 0, 0];
+            categoryMonths[tx.category][idx] += tx.amount;
+        });
+
+        const predictions = Object.entries(categoryMonths)
+            .map(([category, months]) => {
+                const lastMonth = months[2];
+                if (lastMonth === 0) return null;
+                // Weighted average: last month * 0.5 + prev * 0.3 + oldest * 0.2, then apply small trend
+                const weighted = months[2] * 0.5 + months[1] * 0.3 + months[0] * 0.2;
+                // trend: compare last month vs avg of previous two
+                const prevAvg = (months[0] + months[1]) / 2;
+                const trend = prevAvg > 0 ? (months[2] - prevAvg) / prevAvg : 0;
+                const predicted = parseFloat((weighted * (1 + trend * 0.3)).toFixed(2));
+                const changePercent = lastMonth > 0
+                    ? parseFloat(((predicted - lastMonth) / lastMonth * 100).toFixed(1))
+                    : 0;
+                return { category, lastMonth: parseFloat(lastMonth.toFixed(2)), predicted, changePercent };
+            })
+            .filter(Boolean)
+            .sort((a, b) => b.lastMonth - a.lastMonth)
+            .slice(0, 6);
+
+        res.json(predictions);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 export const getAnalytics = async (req, res) => {
     try {
         const userId = req.user._id;

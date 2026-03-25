@@ -67,6 +67,31 @@ export const changePassword = async (req, res) => {
     }
 };
 
+// GET /api/settings/notifications
+export const getNotifications = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select("notifications");
+        res.json(user.notifications ?? { emailNotifications: true, pushNotifications: true, budgetAlerts: true });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+// PUT /api/settings/notifications
+export const updateNotifications = async (req, res) => {
+    try {
+        const { emailNotifications, pushNotifications, budgetAlerts } = req.body;
+        const user = await User.findByIdAndUpdate(
+            req.user._id,
+            { notifications: { emailNotifications, pushNotifications, budgetAlerts } },
+            { new: true }
+        ).select("notifications");
+        res.json(user.notifications);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
 // DELETE /api/settings/account  — delete account and all user data
 export const deleteAccount = async (req, res) => {
     try {

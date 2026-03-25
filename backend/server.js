@@ -9,6 +9,8 @@ import analyticsRoutes from "./src/routes/analyticsRoutes.js";
 import budgetRoutes from "./src/routes/budgetRoutes.js";
 import insightsRoutes from "./src/routes/insightsRoutes.js";
 import settingsRoutes from "./src/routes/settingsRoutes.js";
+import notificationRoutes from "./src/routes/notificationRoutes.js";
+import categoryRoutes from "./src/routes/categoryRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -25,6 +27,8 @@ app.use("/api/analytics", analyticsRoutes);
 app.use("/api/budgets", budgetRoutes);
 app.use("/api/insights", insightsRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/categories", categoryRoutes);
 
 const PORT = process.env.PORT || 5000;
 

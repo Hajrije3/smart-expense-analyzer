@@ -168,6 +168,29 @@ const T: Record<string, Record<string, string>> = {
         income_vs_expenses:"आय बनाम खर्च", track_health:"अपने वित्तीय स्वास्थ्य को ट्रैक करें", no_data_period:"इस अवधि के लिए कोई डेटा नहीं",
         col_category:"श्रेणी", col_type:"प्रकार", col_date:"तारीख", col_status:"स्थिति", col_amount:"राशि", col_actions:"कार्रवाई", tx_completed:"पूर्ण", edit:"संपादित करें", save_changes_btn:"परिवर्तन सहेजें",
     },
+    Albanian: {
+        // Nav
+        dashboard:"Paneli", transactions:"Transaksionet", analytics:"Analitikë", budgets:"Buxhetet", insights:"Njohuri", settings:"Cilësimet", logout:"Dilni",
+        // Dashboard
+        welcome:"Mirë se u kthyet", finances_today:"Ja çfarë po ndodh me financat tuaja sot.", total_balance:"Bilanci Total", monthly_spending:"Shpenzimet Mujore", savings_rate:"Norma e Kursimeve", budget_status:"Gjendja e Buxhetit",
+        // Transactions
+        track_manage:"Gjurmoni dhe menaxhoni të gjitha shpenzimet tuaja", add_transaction:"+ Shto Transaksion", export:"Eksporto", search:"Kërko transaksione...", all:"Të gjitha", income:"Të ardhura", expense:"Shpenzim", all_categories:"Të gjitha Kategoritë", delete_transaction:"Fshi Transaksionin", delete_tx_confirm:"Jeni të sigurt që doni të fshini këtë transaksion? Ky veprim nuk mund të zhbëhet.", cancel:"Anulo", delete:"Fshi",
+        // Analytics
+        deep_dive:"Zhytuni thellë në modelet e shpenzimeve tuaja", range_7d:"7 Ditë", range_1m:"1 Muaj", range_3m:"3 Muaj", range_6m:"6 Muaj", range_1y:"1 Vit", loading:"Duke ngarkuar...", no_data:"Nuk ka të dhëna",
+        // Budgets
+        set_track:"Vendosni dhe gjurmoni kufijtë e shpenzimeve", add_budget:"Shto Buxhet", total_budget:"Buxheti Total", for_this_month:"Për këtë muaj", total_spent:"Totali i Shpenzuar", pct_of_budget:"% e buxhetit", remaining_label:"Mbetur", available_to_spend:"Disponibël për shpenzim", no_budgets:"Nuk ka buxhete", no_budgets_desc:"Klikoni \"+ Shto Buxhet\" për të krijuar kufirin tuaj të parë.", pct_used:"% e përdorur", left:"mbetur", approaching_limit:"Po i afroheni kufirit të buxhetit tuaj", edit_budget:"Ndrysho Buxhetin", add_budget_modal:"Shto Buxhet", category_label:"Kategoria", budget_limit:"Kufiri i Buxhetit", period_label:"Periudha", weekly:"Javor", monthly:"Mujor", yearly:"Vjetor", saving:"Duke ruajtur…", save_changes:"Ruaj Ndryshimet", create_budget:"Krijo Buxhet",
+        // Settings
+        manage_account:"Menaxhoni llogarinë dhe preferencat tuaja", appearance:"Pamja", dark_mode:"Modaliteti i Errët", toggle_dark:"Ndrysho skemën e ngjyrave të errëta", currency_label:"Monedha", language_label:"Gjuha", member_since:"Anëtar që nga", profile_info:"Informacioni i Profilit", full_name:"Emri i Plotë", name_placeholder:"Emri juaj", email_address:"Adresa e Email-it", change_password:"Ndrysho Fjalëkalimin", password_hint:"Përdorni një fjalëkalim të paktën 6 karaktere", current_password:"Fjalëkalimi Aktual", new_password:"Fjalëkalimi i Ri", confirm_password:"Konfirmo Fjalëkalimin e Ri", updating:"Duke përditësuar…", update_password:"Përditëso Fjalëkalimin", danger_zone:"Zona e Rrezikut", danger_zone_desc:"Fshini përgjithmonë llogarinë dhe të gjitha të dhënat", delete_account:"Fshi Llogarinë", delete_warning:"Kjo do të fshijë përgjithmonë llogarinë, të gjitha transaksionet dhe buxhetet. Ky veprim nuk mund të zhbëhet.", confirm_your_password:"Konfirmo fjalëkalimin tuaj", type_delete:"Shkruani FSHI për të konfirmuar", deleting:"Duke fshirë…", permanently_delete:"Fshi Llogarinë Përgjithmonë",
+        // Insights
+        ai_powered:"Analizë financiare e fuqizuar nga AI", ask_placeholder:"Bëni një pyetje specifike (opsionale)…", analyzing:"Duke analizuar…", refresh:"Rifresko", generate_insights:"Gjenero Njohuri", no_insights_title:"Ende nuk ka njohuri", no_insights_desc:"Klikoni \"Gjenero Njohuri\" për të marrë analizën tuaj financiare të personalizuar.", potential_savings:"Kursimet e Mundshme Mujore", opportunity:"mundësi", opportunities:"mundësi", based_on_ops:"Bazuar në", identified:"të identifikuara", financial_health:"Shëndeti Financiar", financial_insights:"Njohuri Financiare", financial_insights_desc:"Analizë e personalizuar e modeleve të shpenzimeve tuaja", recommendations:"Rekomandimet", recommendations_desc:"Hapa konkretë për të përmirësuar financat tuaja", spending_patterns:"Modelet e Shpenzimeve", spending_patterns_desc:"Tendencat e vërejtura në historikun e transaksioneve tuaja",
+        // Components
+        avg_monthly:"Mesatarja e Shpenzimeve Mujore", based_last_7:"Bazuar në 7 muajt e fundit", highest_category:"Kategoria më e Lartë", this_month:"këtë muaj", no_expenses_month:"Nuk ka shpenzime këtë muaj", of_monthly_income:"E të ardhurave mujore",
+        category_breakdown:"Ndarja sipas Kategorisë", where_money_goes:"Ku shkojnë paratë tuaja", no_expense_data:"Nuk ka të dhëna shpenzimesh këtë muaj",
+        weekly_comparison:"Krahasimi Javor", this_month_label:"Këtë muaj", vs_label:"kundrejt", last_month_label:"muajin e kaluar", avg_this_month:"Mesatarja Këtë Muaj", avg_last_month:"Mesatarja Muajin e Kaluar",
+        spending_trend:"Tendenca e Shpenzimeve", monthly_patterns:"Modelet mujore të shpenzimeve",
+        income_vs_expenses:"Të ardhurat kundrejt Shpenzimeve", track_health:"Gjurmoni shëndetin tuaj financiar", no_data_period:"Nuk ka të dhëna për këtë periudhë",
+        col_category:"Kategoria", col_type:"Lloji", col_date:"Data", col_status:"Statusi", col_amount:"Shuma", col_actions:"Veprimet", tx_completed:"Përfunduar", edit:"Ndrysho", save_changes_btn:"Ruaj Ndryshimet",
+    },
 };
 
 // ── Context ───────────────────────────────────────────────────────────────────

@@ -13,7 +13,7 @@ const WeeklyComparison = () => {
     }, []);
 
     return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
+        <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t("weekly_comparison")}</h2>
             <p className="text-sm mb-4">
                 <span className="text-gray-500 dark:text-gray-400">{t("this_month_label")}</span>{" "}

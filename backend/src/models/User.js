@@ -14,6 +14,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    notifications: {
+        emailNotifications: { type: Boolean, default: true },
+        pushNotifications:  { type: Boolean, default: true },
+        budgetAlerts:       { type: Boolean, default: true },
+    },
 }, { timestamps: true });
 
 export default mongoose.model("User", userSchema);

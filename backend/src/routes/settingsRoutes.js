@@ -5,6 +5,8 @@ import {
     updateProfile,
     changePassword,
     deleteAccount,
+    getNotifications,
+    updateNotifications,
 } from "../controllers/settingsController.js";
 
 const router = express.Router();
@@ -15,5 +17,7 @@ router.get("/profile", getProfile);
 router.put("/profile", updateProfile);
 router.put("/password", changePassword);
 router.delete("/account", deleteAccount);
+router.get("/notifications", getNotifications);
+router.put("/notifications", updateNotifications);
 
 export default router;

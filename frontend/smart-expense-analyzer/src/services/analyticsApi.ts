@@ -79,3 +79,15 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
     const { data } = await API.get("/analytics/dashboard-stats");
     return data;
 };
+
+export type PredictionItem = {
+    category: string;
+    lastMonth: number;
+    predicted: number;
+    changePercent: number;
+};
+
+export const getPredictions = async (): Promise<PredictionItem[]> => {
+    const { data } = await API.get("/analytics/predictions");
+    return data;
+};

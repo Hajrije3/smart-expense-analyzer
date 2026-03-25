@@ -4,6 +4,7 @@ import {
     useUpdateTransaction,
 } from "../hooks/useTransactions";
 import type { Transaction } from "../types/transaction";
+import CategoryPicker from "./CategoryPicker";
 
 type Props = {
     onSuccess: () => void;
@@ -89,12 +90,10 @@ const TransactionForm = ({ onSuccess, transaction }: Props) => {
                 onChange={(e) => setAmount(e.target.value)}
             />
 
-            <input
-                type="text"
-                placeholder="Category"
-                className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            <CategoryPicker
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                onChange={setCategory}
+                placeholder="Select category"
             />
 
             <select
