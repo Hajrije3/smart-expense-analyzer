@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import { getInsights, type InsightsResponse, type InsightItem, type Recommendation } from "../services/insightsApi";
@@ -61,7 +61,7 @@ type CardType = "positive" | "warning" | "tip" | "alert";
 const cardCfg: Record<CardType, {
     bg: string; border: string; iconBg: string; iconColor: string;
     metricColor: string; actionLabel: string; actionPath: string;
-    Icon: () => JSX.Element;
+    Icon: () => React.ReactElement;
 }> = {
     positive: {
         bg: "bg-green-50 dark:bg-green-900/20",
