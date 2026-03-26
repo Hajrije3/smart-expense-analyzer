@@ -2,6 +2,7 @@ import Transaction from "../models/Transaction.js";
 import Budget from "../models/Budget.js";
 import Notification from "../models/Notification.js";
 import { sendBudgetAlertEmail } from "../services/emailService.js";
+import ExcelJS from "exceljs";
 
 // After creating an expense, check budgets and send alert if needed
 // user = req.user (already has email, name, notifications loaded by authMiddleware)
@@ -181,6 +182,143 @@ export const updateTransaction = async (req, res) => {
         const updatedTransaction = await transaction.save();
 
         res.json(updatedTransaction);
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// EXPORT TRANSACTIONS AS CSV
+export const exportTransactions = async (req, res) => {
+    try {
+        const { search, type, category } = req.query;
+
+        let query = { user: req.user._id };
+
+        if (search) {
+            query.$or = [
+                { category: { $regex: search, $options: "i" } },
+                { description: { $regex: search, $options: "i" } },
+            ];
+        }
+        if (type && type !== "all") query.type = type;
+        if (category && category !== "all") query.category = category;
+
+        const transactions = await Transaction.find(query).sort({ date: -1 });
+
+        const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+        const formatDate = (d) => new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "2-digit" });
+
+        const totalIncome   = transactions.filter(tx => tx.type === "income").reduce((s, tx) => s + tx.amount, 0);
+        const totalExpenses = transactions.filter(tx => tx.type === "expense").reduce((s, tx) => s + tx.amount, 0);
+        const net           = totalIncome - totalExpenses;
+        const eur = (n) => `€${Math.abs(n).toFixed(2)}`;
+
+        const workbook  = new ExcelJS.Workbook();
+        workbook.creator = "Smart Expense Analyzer";
+        workbook.created = new Date();
+
+        const sheet = workbook.addWorksheet("Transactions");
+
+        // ── Column widths ──────────────────────────────────────────────────
+        sheet.columns = [
+            { key: "no",          width: 6  },
+            { key: "date",        width: 22 },
+            { key: "category",    width: 18 },
+            { key: "type",        width: 12 },
+            { key: "description", width: 32 },
+            { key: "amount",      width: 16 },
+        ];
+
+        // ── Title ──────────────────────────────────────────────────────────
+        const titleRow = sheet.addRow(["Smart Expense Analyzer — Transaction Export"]);
+        sheet.mergeCells(`A${titleRow.number}:F${titleRow.number}`);
+        titleRow.getCell(1).font      = { bold: true, size: 14 };
+        titleRow.getCell(1).alignment = { horizontal: "center" };
+        titleRow.getCell(1).fill      = { type: "pattern", pattern: "solid", fgColor: { argb: "FF22c55e" } };
+        titleRow.getCell(1).font      = { bold: true, size: 14, color: { argb: "FFFFFFFF" } };
+        titleRow.height = 28;
+
+        // ── Meta info ──────────────────────────────────────────────────────
+        const exportedAt = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+        const metaRow = sheet.addRow([`Exported on: ${exportedAt}   |   Total records: ${transactions.length}`]);
+        sheet.mergeCells(`A${metaRow.number}:F${metaRow.number}`);
+        metaRow.getCell(1).font      = { italic: true, size: 10, color: { argb: "FF6B7280" } };
+        metaRow.getCell(1).alignment = { horizontal: "center" };
+        metaRow.height = 18;
+
+        sheet.addRow([]); // spacer
+
+        // ── Summary block ──────────────────────────────────────────────────
+        const summaryTitle = sheet.addRow(["Summary"]);
+        summaryTitle.getCell(1).font = { bold: true, size: 11 };
+
+        const summaryData = [
+            ["Total Income",   `+€${totalIncome.toFixed(2)}`,                        "FF16a34a"],
+            ["Total Expenses", `-€${totalExpenses.toFixed(2)}`,                      "FFdc2626"],
+            ["Net Balance",    `${net >= 0 ? "+" : "-"}${eur(net)}`,                 net >= 0 ? "FF16a34a" : "FFdc2626"],
+        ];
+        for (const [label, value, color] of summaryData) {
+            const r = sheet.addRow([label, value]);
+            r.getCell(1).font = { bold: true, size: 10 };
+            r.getCell(2).font = { bold: true, size: 10, color: { argb: color } };
+        }
+
+        sheet.addRow([]); // spacer
+
+        // ── Column headers ─────────────────────────────────────────────────
+        const headerRow = sheet.addRow(["#", "Date", "Category", "Type", "Description", "Amount"]);
+        headerRow.height = 22;
+        headerRow.eachCell((cell) => {
+            cell.font      = { bold: true, size: 11, color: { argb: "FFFFFFFF" } };
+            cell.fill      = { type: "pattern", pattern: "solid", fgColor: { argb: "FF1f2937" } };
+            cell.alignment = { horizontal: "center", vertical: "middle" };
+            cell.border    = {
+                bottom: { style: "medium", color: { argb: "FF22c55e" } },
+            };
+        });
+
+        // ── Data rows ──────────────────────────────────────────────────────
+        transactions.forEach((tx, i) => {
+            const isExpense = tx.type === "expense";
+            const row = sheet.addRow([
+                i + 1,
+                formatDate(tx.date),
+                capitalize(tx.category),
+                capitalize(tx.type),
+                tx.description || "-",
+                isExpense ? -Math.abs(tx.amount) : tx.amount,
+            ]);
+
+            row.height = 20;
+
+            // Zebra striping
+            const bg = i % 2 === 0 ? "FFF9FAFB" : "FFFFFFFF";
+            row.eachCell((cell) => {
+                cell.fill      = { type: "pattern", pattern: "solid", fgColor: { argb: bg } };
+                cell.alignment = { vertical: "middle" };
+                cell.border    = { bottom: { style: "thin", color: { argb: "FFE5E7EB" } } };
+            });
+
+            // Amount column: right-align, color, accounting format
+            const amountCell = row.getCell(6);
+            amountCell.numFmt     = `"€"#,##0.00;[Red]"(€"#,##0.00")"`;
+            amountCell.font       = { bold: true, color: { argb: isExpense ? "FFdc2626" : "FF16a34a" } };
+            amountCell.alignment  = { horizontal: "right", vertical: "middle" };
+
+            // Center index, date, category, type
+            row.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
+            row.getCell(2).alignment = { horizontal: "center", vertical: "middle" };
+            row.getCell(3).alignment = { horizontal: "center", vertical: "middle" };
+            row.getCell(4).alignment = { horizontal: "center", vertical: "middle" };
+        });
+
+        // ── Send ───────────────────────────────────────────────────────────
+        const filename = `transactions_${new Date().toISOString().slice(0, 10)}.xlsx`;
+        res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+        await workbook.xlsx.write(res);
+        res.end();
 
     } catch (error) {
         res.status(500).json({ message: error.message });

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 import CategoryPicker from "../components/CategoryPicker";
+import CustomSelect from "../components/CustomSelect";
 import { useAppearance } from "../context/AppearanceContext";
 import {
     getBudgets, createBudget, updateBudget, deleteBudget,
@@ -245,15 +246,15 @@ export default function Budgets() {
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t("period_label")}</label>
-                            <select
+                            <CustomSelect
                                 value={form.period}
-                                onChange={(e) => setForm({ ...form, period: e.target.value as FormState["period"] })}
-                                className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
-                            >
-                                <option value="weekly">{t("weekly")}</option>
-                                <option value="monthly">{t("monthly")}</option>
-                                <option value="yearly">{t("yearly")}</option>
-                            </select>
+                                onChange={(v) => setForm({ ...form, period: v as FormState["period"] })}
+                                options={[
+                                    { value: "weekly", label: t("weekly") },
+                                    { value: "monthly", label: t("monthly") },
+                                    { value: "yearly", label: t("yearly") },
+                                ]}
+                            />
                         </div>
                         {error && <p className="text-sm text-red-500">{error}</p>}
                         <div className="flex gap-3 pt-1">

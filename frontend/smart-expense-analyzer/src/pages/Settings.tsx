@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
+import CustomSelect from "../components/CustomSelect";
 import { useAppearance } from "../context/AppearanceContext";
 import {
     getProfile, updateProfile, changePassword, deleteAccount,
@@ -40,8 +41,7 @@ const CURRENCIES = [
 ];
 
 const LANGUAGES = [
-    "English", "Spanish", "French", "German", "Italian",
-    "Portuguese", "Chinese", "Japanese", "Arabic", "Hindi", "Albanian",
+    "English", "Italian", "Arabic", "Albanian",
 ];
 
 // ── Main page ─────────────────────────────────────────────────────────────────
@@ -311,25 +311,21 @@ export default function Settings() {
                     {/* Currency */}
                     <div className="py-4 border-b border-gray-100 dark:border-gray-700">
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t("currency_label")}</p>
-                        <select
+                        <CustomSelect
                             value={currency}
-                            onChange={(e) => setCurrency(e.target.value)}
-                            className="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-400"
-                        >
-                            {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
-                        </select>
+                            onChange={setCurrency}
+                            options={CURRENCIES.map((c) => ({ value: c, label: c }))}
+                        />
                     </div>
 
                     {/* Language */}
                     <div className="pt-4">
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t("language_label")}</p>
-                        <select
+                        <CustomSelect
                             value={language}
-                            onChange={(e) => setLanguage(e.target.value)}
-                            className="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-400"
-                        >
-                            {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
-                        </select>
+                            onChange={setLanguage}
+                            options={LANGUAGES.map((l) => ({ value: l, label: l }))}
+                        />
                     </div>
                 </div>
 

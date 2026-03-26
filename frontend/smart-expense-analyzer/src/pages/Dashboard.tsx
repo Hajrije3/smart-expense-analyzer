@@ -79,8 +79,8 @@ const Dashboard = () => {
                     <StatCard
                         title={t("total_balance")}
                         value={loading ? "—" : (stats ? fmt(stats.totalBalance) : "—")}
-                        change="+12.5%"
-                        changePositive
+                        change={stats?.balanceChange != null ? `${stats.balanceChange > 0 ? "+" : ""}${stats.balanceChange}%` : undefined}
+                        changePositive={stats?.balanceChange != null ? stats.balanceChange >= 0 : undefined}
                         iconBg="bg-[#f0fdf4]"
                         icon={
                             <svg className="w-5 h-5 text-[#22c55e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,8 +95,8 @@ const Dashboard = () => {
                     <StatCard
                         title={t("monthly_spending")}
                         value={loading ? "—" : (stats ? fmt(stats.monthlySpending) : "—")}
-                        change="-8.2%"
-                        changePositive={false}
+                        change={stats?.spendingChange != null ? `${stats.spendingChange > 0 ? "+" : ""}${stats.spendingChange}%` : undefined}
+                        changePositive={stats?.spendingChange != null ? stats.spendingChange <= 0 : undefined}
                         iconBg="bg-[#fff1f2]"
                         icon={
                             <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,8 +111,8 @@ const Dashboard = () => {
                     <StatCard
                         title={t("savings_rate")}
                         value={loading ? "—" : (stats ? `${stats.savingsRate}%` : "—")}
-                        change="+3.1%"
-                        changePositive
+                        change={stats?.savingsRateChange != null ? `${stats.savingsRateChange > 0 ? "+" : ""}${stats.savingsRateChange}pp` : undefined}
+                        changePositive={stats?.savingsRateChange != null ? stats.savingsRateChange >= 0 : undefined}
                         iconBg="bg-[#eff6ff]"
                         icon={
                             <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

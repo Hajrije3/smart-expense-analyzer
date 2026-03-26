@@ -56,3 +56,20 @@ export const deleteTransaction = async (id: string) => {
     const { data } = await API.delete(`/transactions/${id}`);
     return data;
 };
+
+export const exportTransactions = async (filters?: {
+    search?: string;
+    type?: string;
+    category?: string;
+}) => {
+    const params = new URLSearchParams();
+    if (filters?.search) params.append("search", filters.search);
+    if (filters?.type) params.append("type", filters.type);
+    if (filters?.category) params.append("category", filters.category);
+
+    const response = await API.get(`/transactions/export?${params.toString()}`, {
+        responseType: "blob",
+        headers: { Accept: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" },
+    });
+    return response.data as Blob;
+};

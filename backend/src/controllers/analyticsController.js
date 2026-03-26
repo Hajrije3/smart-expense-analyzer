@@ -276,39 +276,67 @@ export const getDashboardStats = async (req, res) => {
     try {
         const userId = req.user._id;
         const now = new Date();
-        const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const thisMonthStart  = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastMonthStart  = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const lastMonthEnd    = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
 
-        const [allTx, thisMonthTx, budgets] = await Promise.all([
+        const [allTx, thisMonthTx, lastMonthTx, budgets] = await Promise.all([
             Transaction.find({ user: userId }),
             Transaction.find({ user: userId, date: { $gte: thisMonthStart } }),
+            Transaction.find({ user: userId, date: { $gte: lastMonthStart, $lte: lastMonthEnd } }),
             Budget.find({ user: userId }),
         ]);
 
-        // Total balance = all-time income - all-time expenses
-        const totalBalance = allTx.reduce((sum, tx) => tx.type === "income" ? sum + tx.amount : sum - tx.amount, 0);
+        // ── Total balance (all-time) ──────────────────────────────────────────
+        const totalBalance = allTx.reduce(
+            (sum, tx) => tx.type === "income" ? sum + tx.amount : sum - tx.amount, 0
+        );
+        // Balance as of end of last month
+        const balanceLastMonth = allTx
+            .filter((tx) => new Date(tx.date) <= lastMonthEnd)
+            .reduce((sum, tx) => tx.type === "income" ? sum + tx.amount : sum - tx.amount, 0);
+        const balanceChange = balanceLastMonth !== 0
+            ? parseFloat(((totalBalance - balanceLastMonth) / Math.abs(balanceLastMonth) * 100).toFixed(1))
+            : null;
 
-        // Monthly spending = current month expenses
+        // ── Monthly spending ──────────────────────────────────────────────────
         const monthlySpending = thisMonthTx
             .filter((tx) => tx.type === "expense")
             .reduce((sum, tx) => sum + tx.amount, 0);
+        const lastMonthSpending = lastMonthTx
+            .filter((tx) => tx.type === "expense")
+            .reduce((sum, tx) => sum + tx.amount, 0);
+        const spendingChange = lastMonthSpending > 0
+            ? parseFloat(((monthlySpending - lastMonthSpending) / lastMonthSpending * 100).toFixed(1))
+            : null;
 
-        // Monthly income
+        // ── Savings rate ──────────────────────────────────────────────────────
         const monthlyIncome = thisMonthTx
             .filter((tx) => tx.type === "income")
             .reduce((sum, tx) => sum + tx.amount, 0);
-
-        // Savings rate = (income - expenses) / income * 100
         const savingsRate = monthlyIncome > 0
             ? parseFloat(((monthlyIncome - monthlySpending) / monthlyIncome * 100).toFixed(1))
             : 0;
 
-        // Budget status = overall % of total budget used (calculate spent from transactions)
+        const lastMonthIncome = lastMonthTx
+            .filter((tx) => tx.type === "income")
+            .reduce((sum, tx) => sum + tx.amount, 0);
+        const lastMonthExpenses = lastMonthTx
+            .filter((tx) => tx.type === "expense")
+            .reduce((sum, tx) => sum + tx.amount, 0);
+        const lastSavingsRate = lastMonthIncome > 0
+            ? parseFloat(((lastMonthIncome - lastMonthExpenses) / lastMonthIncome * 100).toFixed(1))
+            : null;
+        const savingsRateChange = lastSavingsRate !== null
+            ? parseFloat((savingsRate - lastSavingsRate).toFixed(1))
+            : null;
+
+        // ── Budget status ─────────────────────────────────────────────────────
         const totalBudget = budgets.reduce((s, b) => s + b.amount, 0);
         let totalSpent = 0;
         if (budgets.length > 0) {
             const spentResults = await Promise.all(
                 budgets.map((b) => {
-                    const now = new Date();
                     let start;
                     if (b.period === "weekly") {
                         start = new Date(now);
@@ -330,9 +358,12 @@ export const getDashboardStats = async (req, res) => {
         const budgetStatus = totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0;
 
         res.json({
-            totalBalance: parseFloat(totalBalance.toFixed(2)),
-            monthlySpending: parseFloat(monthlySpending.toFixed(2)),
+            totalBalance:     parseFloat(totalBalance.toFixed(2)),
+            balanceChange,
+            monthlySpending:  parseFloat(monthlySpending.toFixed(2)),
+            spendingChange,
             savingsRate,
+            savingsRateChange,
             budgetStatus,
         });
     } catch (error) {

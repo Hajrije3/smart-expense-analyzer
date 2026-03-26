@@ -5,6 +5,7 @@ import {
 } from "../hooks/useTransactions";
 import type { Transaction } from "../types/transaction";
 import CategoryPicker from "./CategoryPicker";
+import CustomSelect from "./CustomSelect";
 
 type Props = {
     onSuccess: () => void;
@@ -96,16 +97,14 @@ const TransactionForm = ({ onSuccess, transaction }: Props) => {
                 placeholder="Select category"
             />
 
-            <select
-                className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            <CustomSelect
                 value={type}
-                onChange={(e) =>
-                    setType(e.target.value as "income" | "expense")
-                }
-            >
-                <option value="expense">Expense</option>
-                <option value="income">Income</option>
-            </select>
+                onChange={(v) => setType(v as "income" | "expense")}
+                options={[
+                    { value: "expense", label: "Expense" },
+                    { value: "income", label: "Income" },
+                ]}
+            />
 
             <input
                 type="text"

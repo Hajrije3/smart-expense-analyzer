@@ -1,10 +1,12 @@
 import Layout from "../components/Layout";
 import { useDeleteTransaction, useTransactions } from "../hooks/useTransactions.ts";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TransactionForm from "../components/TransactionForm.tsx";
 import Modal from "../components/Modal.tsx";
 import type { Transaction } from "../types/transaction.ts";
 import { useAppearance } from "../context/AppearanceContext";
+import { exportTransactions } from "../services/transactionsApi.ts";
+import { fetchCategories, type Category } from "../services/categoriesApi";
 
 const categoryIcon = (category: string) => {
     const c = category.toLowerCase();
@@ -59,12 +61,39 @@ const Transactions = () => {
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null);
+    const [filtersOpen, setFiltersOpen] = useState(false);
+    const [categories, setCategories] = useState<Category[]>([]);
     const { t, fmt } = useAppearance();
 
     const {
         transactions, page, pages, setPage,
-        search, setSearch, refetch,
+        search, setSearch,
+        type, setType,
+        category, setCategory,
+        refetch,
     } = useTransactions();
+
+    useEffect(() => {
+        fetchCategories().then(setCategories).catch(() => {});
+    }, []);
+
+    const activeFilterCount = (type !== "all" ? 1 : 0) + (category !== "all" ? 1 : 0);
+
+    const clearFilters = () => { setType("all"); setCategory("all"); };
+
+    const handleExport = async () => {
+        try {
+            const blob = await exportTransactions({ search, type, category });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `transactions_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error("Export failed:", err);
+        }
+    };
 
     const { remove } = useDeleteTransaction();
 
@@ -92,7 +121,7 @@ const Transactions = () => {
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t("track_manage")}</p>
                     </div>
                     <div className="flex gap-3 flex-shrink-0">
-                        <button className="flex items-center gap-2 px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300 font-medium">
+                        <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300 font-medium">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -112,29 +141,113 @@ const Transactions = () => {
                 </div>
 
                 {/* Search + Filters bar */}
-                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 flex items-center gap-3 px-4 py-3">
-                    <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <input
-                        placeholder="Search transactions..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="flex-1 text-sm focus:outline-none text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 bg-transparent"
-                    />
-                    <button className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 font-medium border-l border-gray-200 dark:border-gray-700 pl-4 hover:text-gray-900 dark:hover:text-white transition-colors flex-shrink-0">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-                                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div className="flex items-center gap-3 px-4 py-3">
+                        <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
-                        Filters
-                    </button>
+                        <input
+                            placeholder={t("search")}
+                            value={search}
+                            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                            className="flex-1 text-sm focus:outline-none text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 bg-transparent"
+                        />
+                        <button
+                            onClick={() => setFiltersOpen((o) => !o)}
+                            className={`flex items-center gap-2 text-sm font-medium border-l border-gray-200 dark:border-gray-700 pl-4 transition-colors flex-shrink-0 ${filtersOpen || activeFilterCount > 0 ? "text-[#22c55e]" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"}`}
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+                                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                            </svg>
+                            Filters
+                            {activeFilterCount > 0 && (
+                                <span className="w-5 h-5 rounded-full bg-[#22c55e] text-white text-xs flex items-center justify-center font-semibold">
+                                    {activeFilterCount}
+                                </span>
+                            )}
+                        </button>
+                    </div>
+
+                    {/* Expandable filter panel */}
+                    {filtersOpen && (
+                        <div className="border-t border-gray-100 dark:border-gray-700 px-4 py-4 space-y-4">
+
+                            {/* Type */}
+                            <div>
+                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Type</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {(["all", "income", "expense"] as const).map((v) => (
+                                        <button
+                                            key={v}
+                                            onClick={() => { setType(v); setPage(1); }}
+                                            className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
+                                                type === v
+                                                    ? "bg-[#22c55e] border-[#22c55e] text-white"
+                                                    : "border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-[#22c55e] hover:text-[#22c55e] dark:hover:text-[#22c55e]"
+                                            }`}
+                                        >
+                                            {v === "all" ? t("all") : v === "income" ? t("income") : t("expense")}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Category */}
+                            {categories.length > 0 && (
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{t("col_category")}</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        <button
+                                            onClick={() => { setCategory("all"); setPage(1); }}
+                                            className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
+                                                category === "all"
+                                                    ? "bg-[#22c55e] border-[#22c55e] text-white"
+                                                    : "border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-[#22c55e] hover:text-[#22c55e] dark:hover:text-[#22c55e]"
+                                            }`}
+                                        >
+                                            {t("all")}
+                                        </button>
+                                        {categories.map((cat) => (
+                                            <button
+                                                key={cat._id}
+                                                onClick={() => { setCategory(cat.name); setPage(1); }}
+                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
+                                                    category === cat.name
+                                                        ? "bg-[#22c55e] border-[#22c55e] text-white"
+                                                        : "border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-[#22c55e] hover:text-[#22c55e] dark:hover:text-[#22c55e]"
+                                                }`}
+                                            >
+                                                <span>{cat.icon}</span>
+                                                {cat.name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Clear */}
+                            {activeFilterCount > 0 && (
+                                <div className="flex justify-end pt-1">
+                                    <button
+                                        onClick={clearFilters}
+                                        className="text-xs text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors underline underline-offset-2"
+                                    >
+                                        Clear all filters
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Count */}
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                     Showing <span className="font-semibold text-gray-900 dark:text-white">{transactions.length}</span> transactions
+                    {activeFilterCount > 0 && (
+                        <span className="ml-2 text-[#22c55e] font-medium">({activeFilterCount} filter{activeFilterCount > 1 ? "s" : ""} active)</span>
+                    )}
                 </p>
 
                 {/* Transaction card list */}
@@ -159,9 +272,6 @@ const Transactions = () => {
                                     <div className="flex items-center gap-2 flex-wrap">
                                         <span className="font-semibold text-gray-900 dark:text-white text-sm">
                                             {tx.description || tx.category}
-                                        </span>
-                                        <span className="text-xs border border-[#22c55e] text-[#16a34a] px-2 py-0.5 rounded-full font-medium">
-                                            completed
                                         </span>
                                     </div>
                                     <p className="text-xs text-gray-400 mt-0.5">

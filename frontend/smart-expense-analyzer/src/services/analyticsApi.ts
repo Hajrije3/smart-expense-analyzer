@@ -70,8 +70,11 @@ export const getSummaryStats = async (): Promise<SummaryStats> => {
 
 export type DashboardStats = {
     totalBalance: number;
+    balanceChange: number | null;
     monthlySpending: number;
+    spendingChange: number | null;
     savingsRate: number;
+    savingsRateChange: number | null;
     budgetStatus: number;
 };
 
