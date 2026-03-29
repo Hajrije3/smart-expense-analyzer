@@ -14,12 +14,10 @@ const DEFAULTS = [
     { name: "Other",          icon: "📦", color: "#6b7280" },
 ];
 
-// GET /api/categories
 export const getCategories = async (req, res) => {
     try {
         let categories = await Category.find({ user: req.user._id }).sort({ createdAt: 1 });
 
-        // Seed defaults for new users
         if (categories.length === 0) {
             categories = await Category.insertMany(
                 DEFAULTS.map((d) => ({ ...d, user: req.user._id }))
@@ -32,13 +30,11 @@ export const getCategories = async (req, res) => {
     }
 };
 
-// POST /api/categories
 export const createCategory = async (req, res) => {
     try {
         const { name, icon, color } = req.body;
         if (!name?.trim()) return res.status(400).json({ message: "Name is required" });
 
-        // Prevent duplicates
         const existing = await Category.findOne({
             user: req.user._id,
             name: { $regex: `^${name.trim()}$`, $options: "i" },
@@ -57,7 +53,6 @@ export const createCategory = async (req, res) => {
     }
 };
 
-// DELETE /api/categories/:id
 export const deleteCategory = async (req, res) => {
     try {
         await Category.findOneAndDelete({ _id: req.params.id, user: req.user._id });

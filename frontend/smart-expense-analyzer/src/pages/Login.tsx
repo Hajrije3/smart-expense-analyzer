@@ -25,10 +25,8 @@ const Login = () => {
     return (
         <div className="flex min-h-screen">
 
-            {/* LEFT SIDE — dark marketing panel */}
             <div className="hidden md:flex w-[47%] bg-[#1a1a1a] text-white flex-col justify-between p-10 lg:p-12">
                 <div>
-                    {/* Logo */}
                     <div className="flex items-center gap-3 mb-16">
                         <div className="w-10 h-10 bg-[#22c55e] rounded-lg flex items-center justify-center">
                             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,7 +38,6 @@ const Login = () => {
                         </span>
                     </div>
 
-                    {/* Headline */}
                     <div className="mb-10">
                         <h2 className="text-4xl lg:text-5xl font-bold leading-tight mb-5">
                             Financial clarity,<br />made simple
@@ -50,7 +47,6 @@ const Login = () => {
                         </p>
                     </div>
 
-                    {/* Features */}
                     <div className="space-y-4">
                         {[
                             "Automatic transaction categorization",
@@ -70,7 +66,6 @@ const Login = () => {
                     </div>
                 </div>
 
-                {/* Footer */}
                 <div className="flex items-center gap-3 text-gray-500 text-sm">
                     <span>© 2024 ExpenseAI</span>
                     <span>•</span>
@@ -80,7 +75,6 @@ const Login = () => {
                 </div>
             </div>
 
-            {/* RIGHT SIDE — login form */}
             <div className="flex w-full md:w-[53%] items-center justify-center bg-[#f5f5f5] px-6 py-10">
                 <div className="w-full max-w-[420px]">
 
@@ -88,7 +82,6 @@ const Login = () => {
                     <p className="text-gray-500 text-sm mb-8">Sign in to continue to your dashboard</p>
 
                     <form onSubmit={handleLogin} className="space-y-5">
-                        {/* Email */}
                         <div>
                             <label className="block text-sm font-medium text-gray-800 mb-1.5">Email</label>
                             <div className="relative">
@@ -108,7 +101,6 @@ const Login = () => {
                             </div>
                         </div>
 
-                        {/* Password */}
                         <div>
                             <label className="block text-sm font-medium text-gray-800 mb-1.5">Password</label>
                             <div className="relative">
@@ -144,7 +136,6 @@ const Login = () => {
                             </div>
                         </div>
 
-                        {/* Remember me + Forgot */}
                         <div className="flex items-center justify-between">
                             <label className="flex items-center gap-2 cursor-pointer">
                                 <input
@@ -160,7 +151,6 @@ const Login = () => {
                             </span>
                         </div>
 
-                        {/* Sign in button */}
                         <button
                             type="submit"
                             className="w-full bg-[#22c55e] hover:bg-[#16a34a] text-white py-3 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center gap-2"
@@ -172,14 +162,12 @@ const Login = () => {
                         </button>
                     </form>
 
-                    {/* Divider */}
                     <div className="flex items-center gap-4 my-6">
                         <div className="flex-1 h-px bg-gray-300" />
                         <span className="text-sm text-gray-500">or</span>
                         <div className="flex-1 h-px bg-gray-300" />
                     </div>
 
-                    {/* Sign up link */}
                     <p className="text-center text-sm text-gray-600">
                         Don't have an account?{" "}
                         <span

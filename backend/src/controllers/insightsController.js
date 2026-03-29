@@ -4,7 +4,6 @@ import Budget from "../models/Budget.js";
 
 const getGroq = () => new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-// Helper: build date range for the last N months
 const lastNMonths = (n) => {
     const end = new Date();
     const start = new Date();
@@ -14,20 +13,16 @@ const lastNMonths = (n) => {
     return { start, end };
 };
 
-// Helper: format currency
 const fmt = (n) => `$${Number(n).toFixed(2)}`;
 
-// Aggregate transactions into a readable summary
 const buildFinancialContext = async (userId) => {
     const { start, end } = lastNMonths(3);
 
-    // All transactions for the last 3 months
     const transactions = await Transaction.find({
         user: userId,
         date: { $gte: start, $lte: end },
     }).sort({ date: -1 });
 
-    // Monthly income/expense totals
     const monthlyAgg = await Transaction.aggregate([
         { $match: { user: userId, date: { $gte: start, $lte: end } } },
         {
@@ -43,7 +38,6 @@ const buildFinancialContext = async (userId) => {
         { $sort: { "_id.year": 1, "_id.month": 1 } },
     ]);
 
-    // Category breakdown (expenses only)
     const categoryAgg = await Transaction.aggregate([
         {
             $match: {
@@ -56,7 +50,6 @@ const buildFinancialContext = async (userId) => {
         { $sort: { total: -1 } },
     ]);
 
-    // Current month budgets with spending
     const budgets = await Budget.find({ user: userId });
     const nowStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     const nowEnd = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0, 23, 59, 59);
@@ -85,7 +78,6 @@ const buildFinancialContext = async (userId) => {
         })
     );
 
-    // Totals
     const totalIncome = transactions
         .filter((t) => t.type === "income")
         .reduce((s, t) => s + t.amount, 0);
@@ -96,7 +88,6 @@ const buildFinancialContext = async (userId) => {
     const savingsRate =
         totalIncome > 0 ? ((netSavings / totalIncome) * 100).toFixed(1) : "0";
 
-    // Format monthly summary
     const monthlyMap = {};
     for (const row of monthlyAgg) {
         const key = `${row._id.year}-${String(row._id.month).padStart(2, "0")}`;
@@ -129,7 +120,6 @@ const buildFinancialContext = async (userId) => {
     };
 };
 
-// POST /api/insights  (body can include optional `question` for targeted advice)
 export const getInsights = async (req, res) => {
     try {
         const financialData = await buildFinancialContext(req.user._id);
@@ -208,7 +198,6 @@ ${userQuestion ? `My specific question: ${userQuestion}` : "Please provide a com
         try {
             parsed = JSON.parse(text);
         } catch {
-            // Fallback: try to extract JSON from the response
             const match = text.match(/\{[\s\S]*\}/);
             if (match) {
                 parsed = JSON.parse(match[0]);

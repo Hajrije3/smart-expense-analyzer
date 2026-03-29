@@ -1,7 +1,6 @@
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 
-// GET /api/settings/profile
 export const getProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user._id).select("-password");
@@ -11,7 +10,6 @@ export const getProfile = async (req, res) => {
     }
 };
 
-// PUT /api/settings/profile  — update name and/or email
 export const updateProfile = async (req, res) => {
     try {
         const { name, email } = req.body;
@@ -20,7 +18,6 @@ export const updateProfile = async (req, res) => {
             return res.status(400).json({ message: "Name and email are required." });
         }
 
-        // Check email not taken by another user
         const existing = await User.findOne({ email: email.toLowerCase(), _id: { $ne: req.user._id } });
         if (existing) {
             return res.status(400).json({ message: "Email is already in use by another account." });
@@ -38,7 +35,6 @@ export const updateProfile = async (req, res) => {
     }
 };
 
-// PUT /api/settings/password  — change password
 export const changePassword = async (req, res) => {
     try {
         const { currentPassword, newPassword } = req.body;
@@ -67,7 +63,6 @@ export const changePassword = async (req, res) => {
     }
 };
 
-// GET /api/settings/notifications
 export const getNotifications = async (req, res) => {
     try {
         const user = await User.findById(req.user._id).select("notifications");
@@ -77,7 +72,6 @@ export const getNotifications = async (req, res) => {
     }
 };
 
-// PUT /api/settings/notifications
 export const updateNotifications = async (req, res) => {
     try {
         const { emailNotifications, pushNotifications, budgetAlerts } = req.body;
@@ -92,7 +86,6 @@ export const updateNotifications = async (req, res) => {
     }
 };
 
-// DELETE /api/settings/account  — delete account and all user data
 export const deleteAccount = async (req, res) => {
     try {
         const { password } = req.body;
@@ -108,7 +101,6 @@ export const deleteAccount = async (req, res) => {
             return res.status(400).json({ message: "Incorrect password." });
         }
 
-        // Import models inline to avoid circular deps
         const { default: Transaction } = await import("../models/Transaction.js");
         const { default: Budget } = await import("../models/Budget.js");
 

@@ -7,9 +7,6 @@ import {
 import type { Transaction } from "../types/transaction";
 
 
-// ==============================
-// 📦 FETCH TRANSACTIONS
-// ==============================
 export const useTransactions = () => {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [page, setPage] = useState(1);
@@ -57,14 +54,11 @@ export const useTransactions = () => {
         setType,
         category,
         setCategory,
-        refetch: fetchTransactions, // 🔁 important
+        refetch: fetchTransactions,
     };
 };
 
 
-// ==============================
-// ➕ CREATE TRANSACTION
-// ==============================
 export const useCreateTransaction = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<any>(null);
@@ -94,9 +88,6 @@ export const useCreateTransaction = () => {
 };
 
 
-// ==============================
-// ✏️ UPDATE TRANSACTION
-// ==============================
 export const useUpdateTransaction = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<any>(null);

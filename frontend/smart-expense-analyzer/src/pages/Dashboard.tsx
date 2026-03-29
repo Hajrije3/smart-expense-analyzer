@@ -64,7 +64,6 @@ const Dashboard = () => {
         <Layout>
             <div className="space-y-6">
 
-                {/* Page header */}
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                         {t("welcome")}, {user?.name || "John"}
@@ -72,10 +71,8 @@ const Dashboard = () => {
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t("finances_today")}</p>
                 </div>
 
-                {/* Stat cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
 
-                    {/* Total Balance */}
                     <StatCard
                         title={t("total_balance")}
                         value={loading ? "—" : (stats ? fmt(stats.totalBalance) : "—")}
@@ -91,7 +88,6 @@ const Dashboard = () => {
                         extra={loading ? skeleton : undefined}
                     />
 
-                    {/* Monthly Spending */}
                     <StatCard
                         title={t("monthly_spending")}
                         value={loading ? "—" : (stats ? fmt(stats.monthlySpending) : "—")}
@@ -107,7 +103,6 @@ const Dashboard = () => {
                         extra={loading ? skeleton : undefined}
                     />
 
-                    {/* Savings Rate */}
                     <StatCard
                         title={t("savings_rate")}
                         value={loading ? "—" : (stats ? `${stats.savingsRate}%` : "—")}
@@ -123,7 +118,6 @@ const Dashboard = () => {
                         extra={loading ? skeleton : undefined}
                     />
 
-                    {/* Budget Usage */}
                     <StatCard
                         title={t("budget_status")}
                         value={loading ? "—" : (stats ? `${stats.budgetStatus}%` : "—")}
@@ -150,7 +144,6 @@ const Dashboard = () => {
                     />
                 </div>
 
-                {/* Charts row — Spending Trend (wide) + Category Breakdown */}
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
                     <div className="lg:col-span-3">
                         <DashboardTrendChart />
@@ -160,7 +153,6 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Widgets row */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <DashboardRecentTransactions />
                     <DashboardQuickInsights />

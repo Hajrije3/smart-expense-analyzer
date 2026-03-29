@@ -1,13 +1,12 @@
 import Budget from "../models/Budget.js";
 import Transaction from "../models/Transaction.js";
 
-// Helper: get start/end date for the current period
 const getPeriodRange = (period) => {
   const now = new Date();
   let start, end;
 
   if (period === "weekly") {
-    const day = now.getDay(); // 0 = Sunday
+    const day = now.getDay();
     start = new Date(now);
     start.setDate(now.getDate() - day);
     start.setHours(0, 0, 0, 0);
@@ -18,7 +17,6 @@ const getPeriodRange = (period) => {
     start = new Date(now.getFullYear(), 0, 1);
     end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
   } else {
-    // monthly (default)
     start = new Date(now.getFullYear(), now.getMonth(), 1);
     end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
   }
@@ -26,7 +24,6 @@ const getPeriodRange = (period) => {
   return { start, end };
 };
 
-// POST /api/budgets
 export const createBudget = async (req, res) => {
   try {
     const { category, amount, period } = req.body;
@@ -51,7 +48,6 @@ export const createBudget = async (req, res) => {
   }
 };
 
-// GET /api/budgets
 export const getBudgets = async (req, res) => {
   try {
     const budgets = await Budget.find({ user: req.user._id }).sort({ createdAt: -1 });
@@ -89,7 +85,6 @@ export const getBudgets = async (req, res) => {
   }
 };
 
-// GET /api/budgets/:id
 export const getBudgetById = async (req, res) => {
   try {
     const budget = await Budget.findOne({ _id: req.params.id, user: req.user._id });
@@ -125,7 +120,6 @@ export const getBudgetById = async (req, res) => {
   }
 };
 
-// PUT /api/budgets/:id
 export const updateBudget = async (req, res) => {
   try {
     const budget = await Budget.findOne({ _id: req.params.id, user: req.user._id });
@@ -148,7 +142,6 @@ export const updateBudget = async (req, res) => {
   }
 };
 
-// DELETE /api/budgets/:id
 export const deleteBudget = async (req, res) => {
   try {
     const budget = await Budget.findOneAndDelete({ _id: req.params.id, user: req.user._id });

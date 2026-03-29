@@ -68,7 +68,6 @@ export default function Budgets() {
         <Layout>
             <div className="space-y-5 sm:space-y-6">
 
-                {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("budgets")}</h1>
@@ -82,7 +81,6 @@ export default function Budgets() {
                     </button>
                 </div>
 
-                {/* Monthly Overview */}
                 {!loading && budgets.length > 0 && (
                     <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
                         <p className="font-bold text-gray-900 dark:text-white mb-5">Monthly Overview</p>
@@ -115,7 +113,6 @@ export default function Budgets() {
                     </div>
                 )}
 
-                {/* Budget cards */}
                 {loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {[1,2,3,4].map((i) => <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 animate-pulse h-48" />)}
@@ -134,7 +131,6 @@ export default function Budgets() {
                             return (
                                 <div key={budget._id} className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 flex flex-col">
 
-                                    {/* Top row: name + status */}
                                     <div className="flex items-center justify-between mb-4">
                                         <p className="font-bold text-gray-900 dark:text-white text-base">{budget.category}</p>
                                         <span className={`flex items-center gap-1.5 text-sm font-medium ${status.color}`}>
@@ -146,7 +142,6 @@ export default function Budgets() {
                                         </span>
                                     </div>
 
-                                    {/* Spent / Budget amounts */}
                                     <div className="flex items-end justify-between mb-3">
                                         <div>
                                             <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">Spent</p>
@@ -158,7 +153,6 @@ export default function Budgets() {
                                         </div>
                                     </div>
 
-                                    {/* % used / $ left */}
                                     <div className="flex items-center justify-between text-sm mb-2">
                                         <span className={`font-medium ${isNear ? "text-orange-500" : "text-gray-500 dark:text-gray-400"}`}>
                                             {pct.toFixed(1)}% used
@@ -166,7 +160,6 @@ export default function Budgets() {
                                         <span className="text-green-600 font-medium">{fmt(budget.remaining)} left</span>
                                     </div>
 
-                                    {/* Progress bar */}
                                     <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2.5 mb-4">
                                         <div
                                             className={`h-2.5 rounded-full transition-all ${getBarColor(pct)}`}
@@ -174,7 +167,6 @@ export default function Budgets() {
                                         />
                                     </div>
 
-                                    {/* Footer */}
                                     <div className="mt-auto border-t border-gray-100 dark:border-gray-700 pt-3 flex items-center justify-between">
                                         <button
                                             onClick={() => openEdit(budget)}
@@ -197,7 +189,6 @@ export default function Budgets() {
                     </div>
                 )}
 
-                {/* Budget Tips */}
                 <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
                     <div className="flex items-center gap-2 mb-5">
                         <svg className="w-5 h-5 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
@@ -218,7 +209,6 @@ export default function Budgets() {
                     </div>
                 </div>
 
-                {/* Modal */}
                 <Modal isOpen={modalOpen} onClose={closeModal}>
                     <h2 className="text-lg font-bold mb-4 text-gray-900 dark:text-white pr-6">
                         {editing ? t("edit_budget") : t("add_budget_modal")}

@@ -7,7 +7,6 @@ const CURRENCY_CODES: Record<string, string> = {
 };
 const getCurrencyCode = (c: string) => CURRENCY_CODES[c] ?? "EUR";
 
-// ── Translations ──────────────────────────────────────────────────────────────
 
 const T: Record<string, Record<string, string>> = {
     English: {
@@ -88,7 +87,6 @@ const T: Record<string, Record<string, string>> = {
     },
 };
 
-// ── Context ───────────────────────────────────────────────────────────────────
 
 type AppearanceContextType = {
     darkMode: boolean; setDarkMode: (v: boolean) => void;
@@ -127,7 +125,6 @@ export const AppearanceProvider = ({ children }: { children: ReactNode }) => {
     const setCurrency = (v: string) => { setCurrencyState(v); persist({ currency: v }); };
     const setLanguage = (v: string) => { setLanguageState(v); persist({ language: v }); };
 
-    // Sync html class on every darkMode change (and on mount to clear any stale class)
     useEffect(() => {
         document.documentElement.classList.toggle("dark", darkMode);
     }, [darkMode]);

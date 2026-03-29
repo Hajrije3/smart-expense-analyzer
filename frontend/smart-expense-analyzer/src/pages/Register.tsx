@@ -22,10 +22,8 @@ const Register = () => {
     return (
         <div className="flex min-h-screen">
 
-            {/* LEFT SIDE — dark marketing panel */}
             <div className="hidden md:flex w-[47%] bg-[#1a1a1a] text-white flex-col justify-between p-10 lg:p-12">
                 <div>
-                    {/* Logo */}
                     <div className="flex items-center gap-3 mb-16">
                         <div className="w-10 h-10 bg-[#22c55e] rounded-lg flex items-center justify-center">
                             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -37,7 +35,6 @@ const Register = () => {
                         </span>
                     </div>
 
-                    {/* Headline */}
                     <div className="mb-10">
                         <h2 className="text-4xl lg:text-5xl font-bold leading-tight mb-5">
                             Start your financial journey
@@ -47,7 +44,6 @@ const Register = () => {
                         </p>
                     </div>
 
-                    {/* Features */}
                     <div className="space-y-4">
                         {[
                             "Automatic transaction categorization",
@@ -67,7 +63,6 @@ const Register = () => {
                     </div>
                 </div>
 
-                {/* Footer */}
                 <div className="flex items-center gap-3 text-gray-500 text-sm">
                     <span>© 2024 ExpenseAI</span>
                     <span>•</span>
@@ -77,7 +72,6 @@ const Register = () => {
                 </div>
             </div>
 
-            {/* RIGHT SIDE — register form */}
             <div className="flex w-full md:w-[53%] items-center justify-center bg-[#f5f5f5] px-6 py-10">
                 <div className="w-full max-w-[420px]">
 
@@ -85,7 +79,6 @@ const Register = () => {
                     <p className="text-gray-500 text-sm mb-8">Sign up to get started with ExpenseAI</p>
 
                     <form onSubmit={handleRegister} className="space-y-5">
-                        {/* Name */}
                         <div>
                             <label className="block text-sm font-medium text-gray-800 mb-1.5">Full Name</label>
                             <div className="relative">
@@ -106,7 +99,6 @@ const Register = () => {
                             </div>
                         </div>
 
-                        {/* Email */}
                         <div>
                             <label className="block text-sm font-medium text-gray-800 mb-1.5">Email</label>
                             <div className="relative">
@@ -127,7 +119,6 @@ const Register = () => {
                             </div>
                         </div>
 
-                        {/* Password */}
                         <div>
                             <label className="block text-sm font-medium text-gray-800 mb-1.5">Password</label>
                             <div className="relative">
@@ -164,7 +155,6 @@ const Register = () => {
                             </div>
                         </div>
 
-                        {/* Submit */}
                         <button
                             type="submit"
                             className="w-full bg-[#22c55e] hover:bg-[#16a34a] text-white py-3 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center gap-2"
@@ -176,14 +166,12 @@ const Register = () => {
                         </button>
                     </form>
 
-                    {/* Divider */}
                     <div className="flex items-center gap-4 my-6">
                         <div className="flex-1 h-px bg-gray-300" />
                         <span className="text-sm text-gray-500">or</span>
                         <div className="flex-1 h-px bg-gray-300" />
                     </div>
 
-                    {/* Sign in link */}
                     <p className="text-center text-sm text-gray-600">
                         Already have an account?{" "}
                         <span

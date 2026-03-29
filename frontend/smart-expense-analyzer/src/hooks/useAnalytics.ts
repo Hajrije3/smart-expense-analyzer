@@ -9,10 +9,10 @@ export const useAnalytics = (range: string = "7d") => {
         try {
             setLoading(true);
             const res = await getAnalytics(range);
-            setData(res || []); // 👈 prevent undefined
+            setData(res || []);
         } catch (err) {
             console.error(err);
-            setData([]); // 👈 prevent crash
+            setData([]);
         } finally {
             setLoading(false);
         }

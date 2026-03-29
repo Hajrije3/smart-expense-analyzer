@@ -47,7 +47,6 @@ const categoryIcon = (category: string) => {
                     d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
         );
-    // default
     return (
         <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
@@ -114,7 +113,6 @@ const Transactions = () => {
         <Layout>
             <div className="space-y-5">
 
-                {/* Header */}
                 <div className="flex items-start justify-between gap-4">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("transactions")}</h1>
@@ -140,7 +138,6 @@ const Transactions = () => {
                     </div>
                 </div>
 
-                {/* Search + Filters bar */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                     <div className="flex items-center gap-3 px-4 py-3">
                         <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,11 +167,9 @@ const Transactions = () => {
                         </button>
                     </div>
 
-                    {/* Expandable filter panel */}
                     {filtersOpen && (
                         <div className="border-t border-gray-100 dark:border-gray-700 px-4 py-4 space-y-4">
 
-                            {/* Type */}
                             <div>
                                 <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Type</p>
                                 <div className="flex flex-wrap gap-2">
@@ -194,7 +189,6 @@ const Transactions = () => {
                                 </div>
                             </div>
 
-                            {/* Category */}
                             {categories.length > 0 && (
                                 <div>
                                     <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">{t("col_category")}</p>
@@ -227,7 +221,6 @@ const Transactions = () => {
                                 </div>
                             )}
 
-                            {/* Clear */}
                             {activeFilterCount > 0 && (
                                 <div className="flex justify-end pt-1">
                                     <button
@@ -242,7 +235,6 @@ const Transactions = () => {
                     )}
                 </div>
 
-                {/* Count */}
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                     Showing <span className="font-semibold text-gray-900 dark:text-white">{transactions.length}</span> transactions
                     {activeFilterCount > 0 && (
@@ -250,7 +242,6 @@ const Transactions = () => {
                     )}
                 </p>
 
-                {/* Transaction card list */}
                 <div className="space-y-3">
                     {transactions.length === 0 ? (
                         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 py-16 text-center">
@@ -262,12 +253,10 @@ const Transactions = () => {
                                 key={tx._id}
                                 className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 px-5 py-4 flex items-center gap-4 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
                             >
-                                {/* Category icon */}
                                 <div className="w-11 h-11 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
                                     {categoryIcon(tx.category)}
                                 </div>
 
-                                {/* Info */}
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 flex-wrap">
                                         <span className="font-semibold text-gray-900 dark:text-white text-sm">
@@ -281,13 +270,11 @@ const Transactions = () => {
                                     </p>
                                 </div>
 
-                                {/* Amount */}
                                 <div className="flex items-center gap-4 flex-shrink-0">
                                     <span className={`font-semibold text-base ${tx.type === "expense" ? "text-gray-900 dark:text-white" : "text-[#16a34a]"}`}>
                                         {tx.type === "expense" ? "-" : "+"}{fmt(tx.amount)}
                                     </span>
 
-                                    {/* Actions (subtle) */}
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => handleEdit(tx)}
@@ -316,7 +303,6 @@ const Transactions = () => {
                     )}
                 </div>
 
-                {/* Pagination */}
                 {pages > 1 && (
                     <div className="flex justify-center items-center gap-4 pt-2">
                         <button
@@ -337,7 +323,6 @@ const Transactions = () => {
                     </div>
                 )}
 
-                {/* ADD/EDIT MODAL */}
                 <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
                     <TransactionForm
                         transaction={selectedTransaction || undefined}
@@ -345,7 +330,6 @@ const Transactions = () => {
                     />
                 </Modal>
 
-                {/* DELETE MODAL */}
                 <Modal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)}>
                     <div className="space-y-4">
                         <h2 className="text-lg font-semibold text-gray-900 dark:text-white pr-6">{t("delete_transaction")}</h2>

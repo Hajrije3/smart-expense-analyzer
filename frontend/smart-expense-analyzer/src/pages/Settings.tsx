@@ -9,7 +9,6 @@ import {
     type UserProfile, type NotificationPrefs,
 } from "../services/settingsApi";
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
 
 const InputField = ({
     label, type = "text", value, onChange, placeholder,
@@ -44,13 +43,11 @@ const LANGUAGES = [
     "English", "Italian", "Arabic", "Albanian",
 ];
 
-// ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function Settings() {
     const navigate = useNavigate();
     const { darkMode, setDarkMode, currency, setCurrency, language, setLanguage, t } = useAppearance();
 
-    // Profile
     const [profile, setProfile]         = useState<UserProfile | null>(null);
     const [firstName, setFirstName]      = useState("");
     const [lastName, setLastName]        = useState("");
@@ -58,19 +55,16 @@ export default function Settings() {
     const [profileMsg, setProfileMsg]    = useState<{ type: "success" | "error"; text: string } | null>(null);
     const [profileLoading, setProfileLoading] = useState(false);
 
-    // Password
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword]          = useState("");
     const [confirmPassword, setConfirmPassword]  = useState("");
     const [passwordMsg, setPasswordMsg]          = useState<{ type: "success" | "error"; text: string } | null>(null);
     const [passwordLoading, setPasswordLoading]  = useState(false);
 
-    // Notifications
     const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs>({
         emailNotifications: true, pushNotifications: true, budgetAlerts: true,
     });
 
-    // Delete
     const [deletePassword, setDeletePassword]   = useState("");
     const [deleteConfirm, setDeleteConfirm]     = useState("");
     const [deleteMsg, setDeleteMsg]             = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -143,7 +137,6 @@ export default function Settings() {
         } finally { setDeleteLoading(false); }
     };
 
-    // Avatar initials
     const initials = [firstName[0], lastName[0]].filter(Boolean).join("").toUpperCase() || "?";
 
     const memberSince = profile?.createdAt
@@ -154,15 +147,12 @@ export default function Settings() {
         <Layout>
             <div className="w-full space-y-5 sm:space-y-6">
 
-                {/* Header */}
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("settings")}</h1>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t("manage_account")}</p>
                 </div>
 
-                {/* Profile Information card */}
                 <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 sm:p-6">
-                    {/* Section title */}
                     <div className="flex items-center gap-2 mb-6">
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
@@ -170,7 +160,6 @@ export default function Settings() {
                         <h2 className="text-base font-semibold text-gray-800 dark:text-white">{t("profile_info")}</h2>
                     </div>
 
-                    {/* Avatar row */}
                     <div className="flex items-center gap-4 mb-6">
                         <div className="w-16 h-16 rounded-full bg-[#22c55e] flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
                             {initials}
@@ -181,7 +170,6 @@ export default function Settings() {
                     </div>
 
                     <form onSubmit={handleProfileSave} className="space-y-4">
-                        {/* First + Last name row */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <InputField label="First Name" value={firstName} onChange={setFirstName} placeholder="John" />
                             <InputField label="Last Name"  value={lastName}  onChange={setLastName}  placeholder="Doe"  />
@@ -189,7 +177,6 @@ export default function Settings() {
                         <InputField label={t("email_address")} type="email" value={email} onChange={setEmail} placeholder="john@example.com" />
                         {profileMsg && <Alert type={profileMsg.type} message={profileMsg.text} />}
 
-                        {/* Action buttons */}
                         <div className="flex justify-end gap-3 pt-1">
                             <button
                                 type="button"
@@ -209,7 +196,6 @@ export default function Settings() {
                     </form>
                 </div>
 
-                {/* Notifications card */}
                 <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 sm:p-6">
                     <div className="flex items-center gap-2 mb-6">
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -276,7 +262,6 @@ export default function Settings() {
                     ))}
                 </div>
 
-                {/* Appearance card */}
                 <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 sm:p-6">
                     <div className="flex items-center gap-2 mb-6">
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -285,7 +270,6 @@ export default function Settings() {
                         <h2 className="text-base font-semibold text-gray-800 dark:text-white">{t("appearance")}</h2>
                     </div>
 
-                    {/* Dark mode */}
                     <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500 flex-shrink-0">
@@ -308,7 +292,6 @@ export default function Settings() {
                         </button>
                     </div>
 
-                    {/* Currency */}
                     <div className="py-4 border-b border-gray-100 dark:border-gray-700">
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t("currency_label")}</p>
                         <CustomSelect
@@ -318,7 +301,6 @@ export default function Settings() {
                         />
                     </div>
 
-                    {/* Language */}
                     <div className="pt-4">
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t("language_label")}</p>
                         <CustomSelect
@@ -329,7 +311,6 @@ export default function Settings() {
                     </div>
                 </div>
 
-                {/* Change Password card */}
                 <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 sm:p-6">
                     <div className="flex items-center gap-2 mb-1">
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-500 dark:text-gray-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -358,7 +339,6 @@ export default function Settings() {
                     </form>
                 </div>
 
-                {/* Danger zone */}
                 <div className="bg-white dark:bg-gray-800 rounded-2xl border border-red-100 dark:border-red-900/40 p-5 sm:p-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div className="flex items-center gap-2">

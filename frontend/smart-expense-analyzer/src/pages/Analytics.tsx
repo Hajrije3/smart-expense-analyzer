@@ -15,16 +15,13 @@ const Analytics = () => {
         <Layout>
             <div className="space-y-6">
 
-                {/* Header */}
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t("analytics")}</h1>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t("deep_dive")}</p>
                 </div>
 
-                {/* 4 stat cards */}
                 <SummaryStats />
 
-                {/* Charts row */}
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
                     <div className="lg:col-span-3">
                         {loading ? (
@@ -38,10 +35,8 @@ const Analytics = () => {
                     </div>
                 </div>
 
-                {/* 6-Month Spending Trend */}
                 <SpendingTrend />
 
-                {/* Key Insights */}
                 <DashboardQuickInsights />
 
             </div>

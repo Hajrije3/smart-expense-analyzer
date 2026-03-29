@@ -4,11 +4,8 @@ import Notification from "../models/Notification.js";
 import { sendBudgetAlertEmail } from "../services/emailService.js";
 import ExcelJS from "exceljs";
 
-// After creating an expense, check budgets and send alert if needed
-// user = req.user (already has email, name, notifications loaded by authMiddleware)
 const checkBudgetAlert = async (user, category) => {
     try {
-        // Default all prefs to true for accounts created before notifications were added
         const prefs = user?.notifications ?? {};
         const budgetAlerts       = prefs.budgetAlerts       !== false;
         const emailNotifications = prefs.emailNotifications !== false;
@@ -51,7 +48,6 @@ const checkBudgetAlert = async (user, category) => {
                 ? `You've exceeded your ${category} budget. Spent $${spent.toFixed(2)} of $${budget.amount.toFixed(2)}.`
                 : `You've used ${percentUsed}% of your ${category} budget. Spent $${spent.toFixed(2)} of $${budget.amount.toFixed(2)}.`;
 
-            // Always create in-app notification if budget alerts are on
             if (budgetAlerts) {
                 await Notification.create({
                     user: user._id,
@@ -62,7 +58,6 @@ const checkBudgetAlert = async (user, category) => {
                 console.log(`[BudgetAlert] in-app notification created`);
             }
 
-            // Send email only if email notifications are also on
             if (budgetAlerts && emailNotifications) {
                 console.log(`[BudgetAlert] sending email to ${user.email}`);
                 await sendBudgetAlertEmail({
@@ -81,7 +76,6 @@ const checkBudgetAlert = async (user, category) => {
     }
 };
 
-// CREATE TRANSACTION
 export const createTransaction = async (req, res) => {
     try {
         const { amount, category, type, description } = req.body;
@@ -94,7 +88,6 @@ export const createTransaction = async (req, res) => {
             description: description || "",
         });
 
-        // Fire budget alert check asynchronously (non-blocking)
         if (type === "expense") {
             checkBudgetAlert(req.user, category);
         }
@@ -106,7 +99,6 @@ export const createTransaction = async (req, res) => {
     }
 };
 
-// GET USER TRANSACTIONS
 export const getTransactions = async (req, res) => {
     try {
         const page = Number(req.query.page) || 1;
@@ -117,7 +109,6 @@ export const getTransactions = async (req, res) => {
 
         let query = { user: req.user._id };
 
-        // 🔍 SEARCH (category or description)
         if (search) {
             query.$or = [
                 { category: { $regex: search, $options: "i" } },
@@ -125,12 +116,10 @@ export const getTransactions = async (req, res) => {
             ];
         }
 
-        // 📊 TYPE FILTER
         if (type && type !== "all") {
             query.type = type;
         }
 
-        // 🧩 CATEGORY FILTER
         if (category && category !== "all") {
             query.category = category;
         }
@@ -154,25 +143,21 @@ export const getTransactions = async (req, res) => {
     }
 };
 
-// UPDATE TRANSACTION
 export const updateTransaction = async (req, res) => {
     try {
         const { id } = req.params;
         const { amount, category, type, date, description } = req.body;
 
-        // Find transaction
         const transaction = await Transaction.findById(id);
 
         if (!transaction) {
             return res.status(404).json({ message: "Transaction not found" });
         }
 
-        // Make sure user owns the transaction
         if (transaction.user.toString() !== req.user._id.toString()) {
             return res.status(401).json({ message: "Not authorized" });
         }
 
-        // Update fields (only if provided)
         transaction.amount = amount ?? transaction.amount;
         transaction.category = category ?? transaction.category;
         transaction.type = type ?? transaction.type;
@@ -188,7 +173,6 @@ export const updateTransaction = async (req, res) => {
     }
 };
 
-// EXPORT TRANSACTIONS AS CSV
 export const exportTransactions = async (req, res) => {
     try {
         const { search, type, category } = req.query;
@@ -220,7 +204,6 @@ export const exportTransactions = async (req, res) => {
 
         const sheet = workbook.addWorksheet("Transactions");
 
-        // ── Column widths ──────────────────────────────────────────────────
         sheet.columns = [
             { key: "no",          width: 6  },
             { key: "date",        width: 22 },
@@ -230,7 +213,6 @@ export const exportTransactions = async (req, res) => {
             { key: "amount",      width: 16 },
         ];
 
-        // ── Title ──────────────────────────────────────────────────────────
         const titleRow = sheet.addRow(["Smart Expense Analyzer — Transaction Export"]);
         sheet.mergeCells(`A${titleRow.number}:F${titleRow.number}`);
         titleRow.getCell(1).font      = { bold: true, size: 14 };
@@ -239,7 +221,6 @@ export const exportTransactions = async (req, res) => {
         titleRow.getCell(1).font      = { bold: true, size: 14, color: { argb: "FFFFFFFF" } };
         titleRow.height = 28;
 
-        // ── Meta info ──────────────────────────────────────────────────────
         const exportedAt = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "2-digit", hour: "2-digit", minute: "2-digit" });
         const metaRow = sheet.addRow([`Exported on: ${exportedAt}   |   Total records: ${transactions.length}`]);
         sheet.mergeCells(`A${metaRow.number}:F${metaRow.number}`);
@@ -247,9 +228,8 @@ export const exportTransactions = async (req, res) => {
         metaRow.getCell(1).alignment = { horizontal: "center" };
         metaRow.height = 18;
 
-        sheet.addRow([]); // spacer
+        sheet.addRow([]);
 
-        // ── Summary block ──────────────────────────────────────────────────
         const summaryTitle = sheet.addRow(["Summary"]);
         summaryTitle.getCell(1).font = { bold: true, size: 11 };
 
@@ -264,9 +244,8 @@ export const exportTransactions = async (req, res) => {
             r.getCell(2).font = { bold: true, size: 10, color: { argb: color } };
         }
 
-        sheet.addRow([]); // spacer
+        sheet.addRow([]);
 
-        // ── Column headers ─────────────────────────────────────────────────
         const headerRow = sheet.addRow(["#", "Date", "Category", "Type", "Description", "Amount"]);
         headerRow.height = 22;
         headerRow.eachCell((cell) => {
@@ -278,7 +257,6 @@ export const exportTransactions = async (req, res) => {
             };
         });
 
-        // ── Data rows ──────────────────────────────────────────────────────
         transactions.forEach((tx, i) => {
             const isExpense = tx.type === "expense";
             const row = sheet.addRow([
@@ -292,7 +270,6 @@ export const exportTransactions = async (req, res) => {
 
             row.height = 20;
 
-            // Zebra striping
             const bg = i % 2 === 0 ? "FFF9FAFB" : "FFFFFFFF";
             row.eachCell((cell) => {
                 cell.fill      = { type: "pattern", pattern: "solid", fgColor: { argb: bg } };
@@ -300,20 +277,17 @@ export const exportTransactions = async (req, res) => {
                 cell.border    = { bottom: { style: "thin", color: { argb: "FFE5E7EB" } } };
             });
 
-            // Amount column: right-align, color, accounting format
             const amountCell = row.getCell(6);
             amountCell.numFmt     = `"€"#,##0.00;[Red]"(€"#,##0.00")"`;
             amountCell.font       = { bold: true, color: { argb: isExpense ? "FFdc2626" : "FF16a34a" } };
             amountCell.alignment  = { horizontal: "right", vertical: "middle" };
 
-            // Center index, date, category, type
             row.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
             row.getCell(2).alignment = { horizontal: "center", vertical: "middle" };
             row.getCell(3).alignment = { horizontal: "center", vertical: "middle" };
             row.getCell(4).alignment = { horizontal: "center", vertical: "middle" };
         });
 
-        // ── Send ───────────────────────────────────────────────────────────
         const filename = `transactions_${new Date().toISOString().slice(0, 10)}.xlsx`;
         res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
@@ -325,24 +299,20 @@ export const exportTransactions = async (req, res) => {
     }
 };
 
-// DELETE TRANSACTION
 export const deleteTransaction = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Find transaction first
         const transaction = await Transaction.findById(id);
 
         if (!transaction) {
             return res.status(404).json({ message: "Transaction not found" });
         }
 
-        // 🔐 Check ownership (VERY IMPORTANT)
         if (transaction.user.toString() !== req.user._id.toString()) {
             return res.status(401).json({ message: "Not authorized" });
         }
 
-        // 🗑 Delete
         await transaction.deleteOne();
 
         res.json({ message: "Transaction deleted successfully" });

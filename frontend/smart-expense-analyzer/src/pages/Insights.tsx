@@ -5,7 +5,6 @@ import { getInsights, type InsightsResponse, type InsightItem, type Recommendati
 import { getPredictions, type PredictionItem } from "../services/analyticsApi";
 import { useAppearance } from "../context/AppearanceContext";
 
-// ── Icons ─────────────────────────────────────────────────────────────────────
 
 const SparkleIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -54,7 +53,6 @@ const RefreshIcon = () => (
     </svg>
 );
 
-// ── Card config ───────────────────────────────────────────────────────────────
 
 type CardType = "positive" | "warning" | "tip" | "alert";
 
@@ -105,7 +103,6 @@ const cardCfg: Record<CardType, {
     },
 };
 
-// extract a short metric string from insight description (e.g. "8.2%" or "$89")
 const extractMetric = (description: string): string => {
     const pct = description.match(/(\+?-?\d+\.?\d*%)/);
     if (pct) return pct[1].startsWith("+") || pct[1].startsWith("-") ? pct[1] : "+" + pct[1];
@@ -114,7 +111,6 @@ const extractMetric = (description: string): string => {
     return "";
 };
 
-// ── Insight card ─────────────────────────────────────────────────────────────
 
 const InsightCard = ({ insight }: { insight: InsightItem }) => {
     const navigate = useNavigate();
@@ -146,7 +142,6 @@ const InsightCard = ({ insight }: { insight: InsightItem }) => {
     );
 };
 
-// ── Recommendation card (same style) ─────────────────────────────────────────
 
 const RecommendationCard = ({ rec }: { rec: Recommendation }) => {
     const { fmt } = useAppearance();
@@ -181,14 +176,12 @@ const RecommendationCard = ({ rec }: { rec: Recommendation }) => {
     );
 };
 
-// ── Health score helpers ──────────────────────────────────────────────────────
 
 const healthColor: Record<string, string> = {
     excellent: "text-green-600", good: "text-blue-600",
     fair: "text-yellow-600",     poor: "text-red-500",
 };
 
-// ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function Insights() {
     const { fmt, t } = useAppearance();
@@ -214,7 +207,6 @@ export default function Insights() {
     const totalSavings = data?.recommendations.reduce((s, r) => s + (r.potentialMonthlySaving ?? 0), 0) ?? 0;
     const oppCount     = data?.recommendations.filter(r => (r.potentialMonthlySaving ?? 0) > 0).length ?? 0;
 
-    // combine all cards: insights first, then recommendations (up to 4 total for grid)
     const allCards = data ? [
         ...data.insights.map(i => ({ kind: "insight" as const, data: i })),
         ...data.recommendations.map(r => ({ kind: "rec" as const, data: r })),
@@ -224,7 +216,6 @@ export default function Insights() {
         <Layout>
             <div className="space-y-6">
 
-                {/* Header */}
                 <div>
                     <div className="flex items-center gap-2 mb-1">
                         <SparkleIcon />
@@ -233,7 +224,6 @@ export default function Insights() {
                     <p className="text-sm text-gray-500 dark:text-gray-400">Personalized recommendations to optimize your finances</p>
                 </div>
 
-                {/* Ask + Generate */}
                 <div className="flex flex-col sm:flex-row gap-3">
                     <input
                         type="text"
@@ -256,12 +246,10 @@ export default function Insights() {
                     </button>
                 </div>
 
-                {/* Error */}
                 {error && (
                     <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm">{error}</div>
                 )}
 
-                {/* Empty state */}
                 {!data && !loading && !error && (
                     <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-12 text-center">
                         <div className="flex justify-center mb-4"><SparkleIcon /></div>
@@ -270,17 +258,14 @@ export default function Insights() {
                     </div>
                 )}
 
-                {/* Loading skeleton */}
                 {loading && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-pulse">
                         {[1,2,3,4].map(i => <div key={i} className="h-44 rounded-2xl bg-gray-100 dark:bg-gray-700" />)}
                     </div>
                 )}
 
-                {/* Results */}
                 {data && !loading && (
                     <>
-                        {/* Health + Savings summary row */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 flex items-center justify-between">
                                 <div>
@@ -310,7 +295,6 @@ export default function Insights() {
                             )}
                         </div>
 
-                        {/* Insight + Recommendation cards grid */}
                         {allCards.length > 0 && (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {allCards.map((card, i) =>
@@ -321,7 +305,6 @@ export default function Insights() {
                             </div>
                         )}
 
-                        {/* Spending Patterns */}
                         {data.spendingPatterns.length > 0 && (
                             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 sm:p-6">
                                 <h2 className="text-base font-bold text-gray-900 dark:text-white mb-1">{t("spending_patterns")}</h2>
@@ -337,14 +320,12 @@ export default function Insights() {
                             </div>
                         )}
 
-                        {/* Footer */}
                         <p className="text-xs text-gray-400 dark:text-gray-500 text-center pb-2">
                             Generated {new Date(data.generatedAt).toLocaleString()} · Based on {data.dataContext.transactionCount} transactions ({data.dataContext.period})
                         </p>
                     </>
                 )}
 
-                {/* Next Month Predictions */}
                 {predictions.length > 0 && (
                     <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-5 sm:p-6">
                         <h2 className="font-bold text-gray-900 dark:text-white text-base mb-0.5">Next Month Predictions</h2>

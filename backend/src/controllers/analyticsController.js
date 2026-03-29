@@ -82,7 +82,6 @@ export const getSummaryStats = async (req, res) => {
         const userId = req.user._id;
         const now = new Date();
 
-        // Last 7 months of expenses for avg monthly spending
         const trendStart = new Date(now.getFullYear(), now.getMonth() - 6, 1);
         const allExpenses = await Transaction.find({
             user: userId,
@@ -101,7 +100,6 @@ export const getSummaryStats = async (req, res) => {
             ? parseFloat((monthValues.reduce((a, b) => a + b, 0) / monthValues.length).toFixed(2))
             : 0;
 
-        // Current month category breakdown for highest category
         const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
         const thisMonthExpenses = await Transaction.find({
             user: userId,
@@ -118,7 +116,6 @@ export const getSummaryStats = async (req, res) => {
         const highestCategory = highestEntry ? highestEntry[0] : null;
         const highestCategoryAmount = highestEntry ? parseFloat(highestEntry[1].toFixed(2)) : 0;
 
-        // Savings rate = (income - expenses) / income * 100 for current month
         const thisMonthIncome = await Transaction.find({
             user: userId,
             type: "income",
@@ -189,7 +186,6 @@ export const getQuickInsights = async (req, res) => {
 
         const insights = [];
 
-        // Budget exceeded / warning insights
         for (const budget of budgets) {
             const spent = thisMonthTx
                 .filter((tx) => tx.type === "expense" && tx.category === budget.category)
@@ -211,7 +207,6 @@ export const getQuickInsights = async (req, res) => {
             }
         }
 
-        // Savings progress
         const monthlyIncome = thisMonthTx
             .filter((tx) => tx.type === "income")
             .reduce((s, tx) => s + tx.amount, 0);
@@ -235,7 +230,6 @@ export const getQuickInsights = async (req, res) => {
             });
         }
 
-        // Unusual weekly spending by category
         const weekByCategory = {};
         weekTx.forEach((tx) => {
             weekByCategory[tx.category] = (weekByCategory[tx.category] || 0) + tx.amount;
@@ -257,7 +251,6 @@ export const getQuickInsights = async (req, res) => {
             }
         }
 
-        // Default tip if no insights
         if (insights.length === 0) {
             insights.push({
                 type: "positive",
@@ -287,11 +280,9 @@ export const getDashboardStats = async (req, res) => {
             Budget.find({ user: userId }),
         ]);
 
-        // ── Total balance (all-time) ──────────────────────────────────────────
         const totalBalance = allTx.reduce(
             (sum, tx) => tx.type === "income" ? sum + tx.amount : sum - tx.amount, 0
         );
-        // Balance as of end of last month
         const balanceLastMonth = allTx
             .filter((tx) => new Date(tx.date) <= lastMonthEnd)
             .reduce((sum, tx) => tx.type === "income" ? sum + tx.amount : sum - tx.amount, 0);
@@ -299,7 +290,6 @@ export const getDashboardStats = async (req, res) => {
             ? parseFloat(((totalBalance - balanceLastMonth) / Math.abs(balanceLastMonth) * 100).toFixed(1))
             : null;
 
-        // ── Monthly spending ──────────────────────────────────────────────────
         const monthlySpending = thisMonthTx
             .filter((tx) => tx.type === "expense")
             .reduce((sum, tx) => sum + tx.amount, 0);
@@ -310,7 +300,6 @@ export const getDashboardStats = async (req, res) => {
             ? parseFloat(((monthlySpending - lastMonthSpending) / lastMonthSpending * 100).toFixed(1))
             : null;
 
-        // ── Savings rate ──────────────────────────────────────────────────────
         const monthlyIncome = thisMonthTx
             .filter((tx) => tx.type === "income")
             .reduce((sum, tx) => sum + tx.amount, 0);
@@ -331,7 +320,6 @@ export const getDashboardStats = async (req, res) => {
             ? parseFloat((savingsRate - lastSavingsRate).toFixed(1))
             : null;
 
-        // ── Budget status ─────────────────────────────────────────────────────
         const totalBudget = budgets.reduce((s, b) => s + b.amount, 0);
         let totalSpent = 0;
         if (budgets.length > 0) {
@@ -376,9 +364,8 @@ export const getPredictions = async (req, res) => {
         const userId = req.user._id;
         const now = new Date();
 
-        // Fetch last 3 full months of expenses
         const start = new Date(now.getFullYear(), now.getMonth() - 3, 1);
-        const end   = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59); // end of last month
+        const end   = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
 
         const transactions = await Transaction.find({
             user: userId,
@@ -386,13 +373,12 @@ export const getPredictions = async (req, res) => {
             date: { $gte: start, $lte: end },
         });
 
-        // Group spending by category and by month index (0 = 3 months ago, 1 = 2 months ago, 2 = last month)
         const categoryMonths = {};
         transactions.forEach((tx) => {
             const d = new Date(tx.date);
             const monthsAgo = (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth()) - 1;
             if (monthsAgo < 0 || monthsAgo > 2) return;
-            const idx = 2 - monthsAgo; // 0=oldest, 2=last month
+            const idx = 2 - monthsAgo;
             if (!categoryMonths[tx.category]) categoryMonths[tx.category] = [0, 0, 0];
             categoryMonths[tx.category][idx] += tx.amount;
         });
@@ -401,9 +387,7 @@ export const getPredictions = async (req, res) => {
             .map(([category, months]) => {
                 const lastMonth = months[2];
                 if (lastMonth === 0) return null;
-                // Weighted average: last month * 0.5 + prev * 0.3 + oldest * 0.2, then apply small trend
                 const weighted = months[2] * 0.5 + months[1] * 0.3 + months[0] * 0.2;
-                // trend: compare last month vs avg of previous two
                 const prevAvg = (months[0] + months[1]) / 2;
                 const trend = prevAvg > 0 ? (months[2] - prevAvg) / prevAvg : 0;
                 const predicted = parseFloat((weighted * (1 + trend * 0.3)).toFixed(2));
@@ -427,7 +411,6 @@ export const getAnalytics = async (req, res) => {
         const userId = req.user._id;
         const range = req.query.range || "7d";
 
-        // 🧠 Determine date range
         const now = new Date();
         let startDate = new Date();
 
@@ -451,13 +434,11 @@ export const getAnalytics = async (req, res) => {
                 startDate.setDate(now.getDate() - 7);
         }
 
-        // 📊 Aggregate data
         const transactions = await Transaction.find({
             user: userId,
             date: { $gte: startDate },
         });
 
-        // 🧠 Group by month/day
         const resultMap = {};
 
         transactions.forEach((tx) => {
@@ -481,7 +462,6 @@ export const getAnalytics = async (req, res) => {
             }
         });
 
-        // 📦 Format response
         const analytics = Object.entries(resultMap).map(([label, data]) => ({
             label,
             income: data.income,

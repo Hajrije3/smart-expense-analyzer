@@ -65,7 +65,6 @@ export default function CategoryPicker({ value, onChange, placeholder = "Select 
 
     return (
         <div className="relative" ref={ref}>
-            {/* Trigger */}
             <button
                 type="button"
                 onClick={() => { setOpen((o) => !o); setShowNew(false); }}
@@ -89,10 +88,8 @@ export default function CategoryPicker({ value, onChange, placeholder = "Select 
                 </svg>
             </button>
 
-            {/* Dropdown */}
             {open && (
                 <div className="absolute z-50 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden">
-                    {/* Category grid */}
                     <div className="max-h-52 overflow-y-auto p-2 grid grid-cols-2 gap-1">
                         {categories.map((cat) => (
                             <button
@@ -114,7 +111,6 @@ export default function CategoryPicker({ value, onChange, placeholder = "Select 
                         ))}
                     </div>
 
-                    {/* Add new */}
                     <div className="border-t border-gray-100 dark:border-gray-700">
                         {!showNew ? (
                             <button
@@ -131,7 +127,6 @@ export default function CategoryPicker({ value, onChange, placeholder = "Select 
                             <div className="p-3 space-y-3">
                                 <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">New Category</p>
 
-                                {/* Name */}
                                 <input
                                     onKeyDown={(e) => e.key === "Enter" && handleCreate()}
                                     autoFocus
@@ -142,7 +137,6 @@ export default function CategoryPicker({ value, onChange, placeholder = "Select 
                                     className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
                                 />
 
-                                {/* Icon picker */}
                                 <div>
                                     <p className="text-xs text-gray-400 dark:text-gray-500 mb-1.5">Icon</p>
                                     <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
@@ -161,7 +155,6 @@ export default function CategoryPicker({ value, onChange, placeholder = "Select 
                                     </div>
                                 </div>
 
-                                {/* Color picker */}
                                 <div>
                                     <p className="text-xs text-gray-400 dark:text-gray-500 mb-1.5">Color</p>
                                     <div className="flex flex-wrap gap-1.5">

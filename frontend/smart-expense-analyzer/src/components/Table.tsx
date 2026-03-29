@@ -26,12 +26,10 @@ const Table = <T,>({
     return (
         <div className="space-y-4">
 
-            {/* TABLE with horizontal scroll on small screens */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
                 <div className="overflow-x-auto">
                     <div style={{ minWidth: "640px" }}>
 
-                        {/* HEADER */}
                         <div
                             className="grid px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-750"
                             style={{ gridTemplateColumns: gridTemplate }}
@@ -41,7 +39,6 @@ const Table = <T,>({
                             ))}
                         </div>
 
-                        {/* ROWS */}
                         <div>
                             {data.length === 0 ? (
                                 <p className="text-center text-gray-400 dark:text-gray-500 text-sm py-10">
@@ -68,7 +65,6 @@ const Table = <T,>({
                 </div>
             </div>
 
-            {/* PAGINATION */}
             {pages > 1 && (
                 <div className="flex justify-center items-center gap-4">
                     <button

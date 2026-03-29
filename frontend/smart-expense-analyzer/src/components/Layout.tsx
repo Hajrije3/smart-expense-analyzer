@@ -80,7 +80,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
         fetchNotifications().then(setNotifications).catch(() => {});
     }, []);
 
-    // Close bell dropdown on outside click
     useEffect(() => {
         const handler = (e: MouseEvent) => {
             if (bellRef.current && !bellRef.current.contains(e.target as Node)) {
@@ -146,7 +145,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
     const sidebarContent = (
         <div className="w-60 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-full flex flex-col">
-            {/* Logo */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-700">
                 <div className="flex items-center gap-2.5">
                     <div className="w-8 h-8 bg-[#22c55e] rounded-lg flex items-center justify-center flex-shrink-0">
@@ -177,7 +175,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
                 </button>
             </div>
 
-            {/* Nav links */}
             <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
                 {navLinks.map(({ path, key, icon }) => (
                     <button
@@ -197,7 +194,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
                 ))}
             </nav>
 
-            {/* User + logout */}
             <div className="px-4 py-4 border-t border-gray-100 dark:border-gray-700">
                 <div className="flex items-center gap-3 mb-3">
                     <div className="w-9 h-9 bg-[#22c55e] rounded-full flex items-center justify-center flex-shrink-0">
@@ -222,7 +218,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
     return (
         <div className="flex h-screen bg-[#f5f5f5] dark:bg-gray-950 overflow-hidden">
 
-            {/* Mobile backdrop */}
             {sidebarOpen && (
                 <div
                     className="fixed inset-0 bg-black/40 z-20 lg:hidden"
@@ -230,7 +225,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
                 />
             )}
 
-            {/* Sidebar */}
             <aside
                 className={[
                     "fixed inset-y-0 left-0 z-30 flex-shrink-0",
@@ -242,12 +236,9 @@ const Layout = ({ children }: { children: ReactNode }) => {
                 {sidebarContent}
             </aside>
 
-            {/* Main content */}
             <div className="flex-1 flex flex-col overflow-hidden min-w-0">
 
-                {/* Top header bar */}
                 <header className="flex items-center gap-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-3 flex-shrink-0">
-                    {/* Hamburger — mobile only */}
                     <button
                         onClick={() => setSidebarOpen(true)}
                         className="lg:hidden p-1.5 rounded text-gray-500 hover:text-gray-700"
@@ -258,7 +249,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
                         </svg>
                     </button>
 
-                    {/* Notification bell */}
                     <div className="relative ml-auto" ref={bellRef}>
                         <button
                             onClick={() => setBellOpen((o) => !o)}
@@ -275,10 +265,8 @@ const Layout = ({ children }: { children: ReactNode }) => {
                             )}
                         </button>
 
-                        {/* Dropdown */}
                         {bellOpen && (
                             <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 overflow-hidden">
-                                {/* Header */}
                                 <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
                                     <span className="font-semibold text-gray-900 dark:text-white text-sm">Notifications</span>
                                     {unreadCount > 0 && (
@@ -291,7 +279,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
                                     )}
                                 </div>
 
-                                {/* List */}
                                 <div className="max-h-80 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700">
                                     {notifications.length === 0 ? (
                                         <div className="px-4 py-8 text-center text-gray-400 dark:text-gray-500 text-sm">
@@ -336,7 +323,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
                     </div>
                 </header>
 
-                {/* Page content */}
                 <main className="flex-1 p-6 overflow-y-auto dark:bg-gray-950">
                     {children}
                 </main>

@@ -6,7 +6,6 @@ const router = express.Router();
 
 router.use(protect);
 
-// POST /api/insights — optional body: { question: string }
 router.post("/", getInsights);
 
 export default router;

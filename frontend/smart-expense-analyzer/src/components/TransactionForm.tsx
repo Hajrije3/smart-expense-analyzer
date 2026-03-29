@@ -25,7 +25,6 @@ const TransactionForm = ({ onSuccess, transaction }: Props) => {
     const [type, setType] = useState<"income" | "expense">("expense");
     const [description, setDescription] = useState("");
 
-    // ✅ Prefill when editing
     useEffect(() => {
         if (transaction) {
             setAmount(transaction.amount.toString());
@@ -33,7 +32,6 @@ const TransactionForm = ({ onSuccess, transaction }: Props) => {
             setType(transaction.type);
             setDescription(transaction.description || "");
         } else {
-            // reset when switching to add mode
             setAmount("");
             setCategory("");
             setType("expense");
@@ -63,7 +61,6 @@ const TransactionForm = ({ onSuccess, transaction }: Props) => {
                 });
             }
 
-            // ✅ reset form after success (optional)
             setAmount("");
             setCategory("");
             setType("expense");

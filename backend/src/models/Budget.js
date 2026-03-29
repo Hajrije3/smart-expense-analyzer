@@ -24,7 +24,6 @@ const budgetSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// One budget per user per category per period
 budgetSchema.index({ user: 1, category: 1, period: 1 }, { unique: true });
 
 export default mongoose.model("Budget", budgetSchema);

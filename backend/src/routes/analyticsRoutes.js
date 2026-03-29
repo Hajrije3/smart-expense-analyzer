@@ -4,7 +4,6 @@ import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// GET /api/analytics?range=7d
 router.get("/", protect, getAnalytics);
 router.get("/category-breakdown", protect, getCategoryBreakdown);
 router.get("/weekly-comparison", protect, getWeeklyComparison);
