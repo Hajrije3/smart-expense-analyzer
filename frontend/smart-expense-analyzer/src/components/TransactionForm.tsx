@@ -6,6 +6,7 @@ import {
 import type { Transaction } from "../types/transaction";
 import CategoryPicker from "./CategoryPicker";
 import CustomSelect from "./CustomSelect";
+import { useAppearance } from "../context/AppearanceContext";
 
 type Props = {
     onSuccess: () => void;
@@ -14,6 +15,7 @@ type Props = {
 
 const TransactionForm = ({ onSuccess, transaction }: Props) => {
     const isEdit = !!transaction;
+    const { t } = useAppearance();
 
     const { create, loading: creating } = useCreateTransaction();
     const { update, loading: updating } = useUpdateTransaction();
@@ -77,12 +79,12 @@ const TransactionForm = ({ onSuccess, transaction }: Props) => {
         <form onSubmit={handleSubmit} className="space-y-4">
 
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                {isEdit ? "Edit Transaction" : "Add Transaction"}
+                {isEdit ? t("edit_transaction") : t("add_transaction")}
             </h2>
 
             <input
                 type="number"
-                placeholder="Amount"
+                placeholder={t("amount_label")}
                 className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
@@ -91,21 +93,21 @@ const TransactionForm = ({ onSuccess, transaction }: Props) => {
             <CategoryPicker
                 value={category}
                 onChange={setCategory}
-                placeholder="Select category"
+                placeholder={t("select_category_placeholder")}
             />
 
             <CustomSelect
                 value={type}
                 onChange={(v) => setType(v as "income" | "expense")}
                 options={[
-                    { value: "expense", label: "Expense" },
-                    { value: "income", label: "Income" },
+                    { value: "expense", label: t("expense") },
+                    { value: "income", label: t("income") },
                 ]}
             />
 
             <input
                 type="text"
-                placeholder="Description (optional)"
+                placeholder={t("description_optional")}
                 className="w-full border dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -117,10 +119,10 @@ const TransactionForm = ({ onSuccess, transaction }: Props) => {
                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg disabled:opacity-50"
             >
                 {loading
-                    ? "Processing..."
+                    ? t("processing")
                     : isEdit
-                        ? "Update Transaction"
-                        : "Add Transaction"}
+                        ? t("update_transaction")
+                        : t("add_transaction")}
             </button>
 
         </form>

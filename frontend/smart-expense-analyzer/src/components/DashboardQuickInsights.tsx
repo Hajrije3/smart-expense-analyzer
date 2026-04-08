@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../services/api";
+import { useAppearance } from "../context/AppearanceContext";
 
 type Insight = {
     type: "warning" | "alert" | "positive" | "tip";
@@ -33,6 +34,7 @@ const DashboardQuickInsights = () => {
     const [insights, setInsights] = useState<Insight[]>([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const { t } = useAppearance();
 
     useEffect(() => {
         API.get("/analytics/quick-insights")
@@ -44,12 +46,12 @@ const DashboardQuickInsights = () => {
     return (
         <div className="bg-white rounded-2xl border border-gray-200 p-5">
             <div className="flex items-center justify-between mb-5">
-                <h2 className="text-base font-bold text-gray-900">Key Insights</h2>
+                <h2 className="text-base font-bold text-gray-900">{t("key_insights")}</h2>
                 <button
                     onClick={() => navigate("/insights")}
                     className="text-sm text-[#22c55e] hover:text-[#16a34a] font-medium transition-colors"
                 >
-                    View All
+                    {t("view_all")}
                 </button>
             </div>
 
@@ -60,7 +62,7 @@ const DashboardQuickInsights = () => {
                     ))}
                 </div>
             ) : insights.length === 0 ? (
-                <p className="text-gray-400 text-sm text-center py-8">No insights available</p>
+                <p className="text-gray-400 text-sm text-center py-8">{t("no_insights_available")}</p>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {insights.slice(0, 4).map((insight, i) => (

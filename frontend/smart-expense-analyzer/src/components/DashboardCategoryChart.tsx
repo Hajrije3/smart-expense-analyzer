@@ -8,7 +8,7 @@ const COLORS = ["#22c55e", "#f97316", "#ef4444", "#3b82f6", "#06b6d4", "#8b5cf6"
 const DashboardCategoryChart = () => {
     const [breakdown, setBreakdown] = useState<CategoryBreakdownItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const { fmt } = useAppearance();
+    const { fmt, t } = useAppearance();
 
     useEffect(() => {
         getCategoryBreakdown()
@@ -19,13 +19,13 @@ const DashboardCategoryChart = () => {
 
     return (
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-5 h-full">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white">Category Breakdown</h2>
-            <p className="text-sm text-gray-400 dark:text-gray-500 mb-4">This month</p>
+            <h2 className="text-base font-bold text-gray-900 dark:text-white">{t("category_breakdown")}</h2>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mb-4">{t("this_month_label")}</p>
 
             {loading ? (
                 <div className="h-56 animate-pulse bg-gray-100 dark:bg-gray-700 rounded-xl" />
             ) : breakdown.length === 0 ? (
-                <p className="text-gray-400 text-sm text-center py-16">No expense data this month</p>
+                <p className="text-gray-400 text-sm text-center py-16">{t("no_expense_data")}</p>
             ) : (
                 <>
                     <div className="h-48">

@@ -65,7 +65,7 @@ const DefaultIcon = () => (
 const DashboardRecentTransactions = () => {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(true);
-    const { fmt } = useAppearance();
+    const { fmt, t } = useAppearance();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -78,15 +78,15 @@ const DashboardRecentTransactions = () => {
     return (
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 sm:p-6">
             <div className="flex items-center justify-between mb-1">
-                <h2 className="text-base font-bold text-gray-900 dark:text-white">Recent Transactions</h2>
+                <h2 className="text-base font-bold text-gray-900 dark:text-white">{t("recent_transactions")}</h2>
                 <button
                     onClick={() => navigate("/transactions")}
                     className="text-sm text-indigo-500 hover:text-indigo-600 font-medium"
                 >
-                    View All
+                    {t("view_all")}
                 </button>
             </div>
-            <p className="text-sm text-gray-400 dark:text-gray-500 mb-5">Your latest activity</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mb-5">{t("latest_activity")}</p>
 
             {loading ? (
                 <div className="space-y-4">
@@ -102,7 +102,7 @@ const DashboardRecentTransactions = () => {
                     ))}
                 </div>
             ) : transactions.length === 0 ? (
-                <p className="text-gray-400 text-sm text-center py-8">No transactions yet</p>
+                <p className="text-gray-400 text-sm text-center py-8">{t("no_transactions_yet")}</p>
             ) : (
                 <div className="space-y-4">
                     {transactions.map((tx) => {
@@ -114,7 +114,7 @@ const DashboardRecentTransactions = () => {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-semibold text-gray-800 dark:text-white truncate">{tx.category}</p>
-                                    <p className="text-xs text-indigo-400">{tx.type === "expense" ? tx.category : "Income"}</p>
+                                    <p className="text-xs text-indigo-400">{tx.type === "expense" ? tx.category : t("income")}</p>
                                 </div>
                                 <div className="text-right flex-shrink-0">
                                     <p className={`text-sm font-bold ${tx.type === "expense" ? "text-gray-900 dark:text-white" : "text-green-500"}`}>

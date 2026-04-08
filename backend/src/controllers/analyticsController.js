@@ -94,6 +94,7 @@ export const getSummaryStats = async (req, res) => {
                 { $group: {
                     _id: { type: "$type", category: "$category" },
                     total: { $sum: "$amount" },
+                    count: { $sum: 1 },
                 }},
             ]),
         ]);
@@ -106,10 +107,12 @@ export const getSummaryStats = async (req, res) => {
         const categoryMap = {};
         let totalIncome = 0;
         let totalExpenses = 0;
+        let expenseCount = 0;
         thisMonthStats.forEach((r) => {
             if (r._id.type === "expense") {
                 categoryMap[r._id.category] = (categoryMap[r._id.category] || 0) + r.total;
                 totalExpenses += r.total;
+                expenseCount += r.count;
             } else {
                 totalIncome += r.total;
             }
@@ -121,8 +124,11 @@ export const getSummaryStats = async (req, res) => {
         const savingsRate = totalIncome > 0
             ? parseFloat(((totalIncome - totalExpenses) / totalIncome * 100).toFixed(1))
             : 0;
+        const avgTransaction = expenseCount > 0
+            ? parseFloat((totalExpenses / expenseCount).toFixed(2))
+            : 0;
 
-        res.json({ avgMonthlySpending, highestCategory, highestCategoryAmount, savingsRate, totalIncome });
+        res.json({ avgMonthlySpending, highestCategory, highestCategoryAmount, savingsRate, totalIncome, totalExpenses: parseFloat(totalExpenses.toFixed(2)), expenseCount, avgTransaction });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -494,6 +500,43 @@ export const getAnalytics = async (req, res) => {
 
         res.json(analytics);
 
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const getYearOverYear = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const now = new Date();
+        const thisYearStart = new Date(now.getFullYear(), 0, 1);
+        const lastYearStart = new Date(now.getFullYear() - 1, 0, 1);
+        const lastYearEnd   = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59);
+
+        const [thisYearData, lastYearData] = await Promise.all([
+            Transaction.aggregate([
+                { $match: { user: userId, type: "expense", date: { $gte: thisYearStart } } },
+                { $group: { _id: { $month: "$date" }, total: { $sum: "$amount" } } },
+            ]),
+            Transaction.aggregate([
+                { $match: { user: userId, type: "expense", date: { $gte: lastYearStart, $lte: lastYearEnd } } },
+                { $group: { _id: { $month: "$date" }, total: { $sum: "$amount" } } },
+            ]),
+        ]);
+
+        const hasLastYearData = lastYearData.length > 0;
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const thisYearMap = Object.fromEntries(thisYearData.map((r) => [r._id, r.total]));
+        const lastYearMap = Object.fromEntries(lastYearData.map((r) => [r._id, r.total]));
+
+        const currentMonth = now.getMonth() + 1;
+        const data = monthNames.slice(0, currentMonth).map((month, i) => ({
+            month,
+            thisYear: parseFloat((thisYearMap[i + 1] || 0).toFixed(2)),
+            lastYear: parseFloat((lastYearMap[i + 1] || 0).toFixed(2)),
+        }));
+
+        res.json({ data, hasLastYearData });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

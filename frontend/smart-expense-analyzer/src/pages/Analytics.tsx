@@ -4,11 +4,9 @@ import CategoryBreakdown from "../components/CategoryBreakdown";
 import SummaryStats from "../components/SummaryStats";
 import SpendingTrend from "../components/SpendingTrend";
 import DashboardQuickInsights from "../components/DashboardQuickInsights";
-import { useAnalytics } from "../hooks/useAnalytics";
 import { useAppearance } from "../context/AppearanceContext";
 
 const Analytics = () => {
-    const { data, loading } = useAnalytics("1y");
     const { t } = useAppearance();
 
     return (
@@ -24,11 +22,7 @@ const Analytics = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
                     <div className="lg:col-span-3">
-                        {loading ? (
-                            <div className="bg-white rounded-2xl border border-gray-200 p-6 h-80 animate-pulse" />
-                        ) : (
-                            <AnalyticsChart data={data || []} />
-                        )}
+                        <AnalyticsChart />
                     </div>
                     <div className="lg:col-span-2">
                         <CategoryBreakdown />

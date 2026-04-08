@@ -118,10 +118,10 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
     const timeAgo = (iso: string) => {
         const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-        if (diff < 60) return "just now";
-        if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-        if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-        return `${Math.floor(diff / 86400)}d ago`;
+        if (diff < 60) return t("just_now");
+        if (diff < 3600) return `${Math.floor(diff / 60)}${t("min_ago")}`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)}${t("hour_ago")}`;
+        return `${Math.floor(diff / 86400)}${t("day_ago")}`;
     };
 
     const handleLogout = () => {
@@ -282,7 +282,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
                                 <div className="max-h-80 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700">
                                     {notifications.length === 0 ? (
                                         <div className="px-4 py-8 text-center text-gray-400 dark:text-gray-500 text-sm">
-                                            No notifications yet
+                                            {t("no_notifications_yet")}
                                         </div>
                                     ) : (
                                         notifications.map((n) => (

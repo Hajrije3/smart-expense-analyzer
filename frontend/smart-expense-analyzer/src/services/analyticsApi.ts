@@ -61,6 +61,9 @@ export type SummaryStats = {
     highestCategoryAmount: number;
     savingsRate: number;
     totalIncome: number;
+    totalExpenses: number;
+    expenseCount: number;
+    avgTransaction: number;
 };
 
 export const getSummaryStats = async (): Promise<SummaryStats> => {
@@ -92,5 +95,13 @@ export type PredictionItem = {
 
 export const getPredictions = async (): Promise<PredictionItem[]> => {
     const { data } = await API.get("/analytics/predictions");
+    return data;
+};
+
+export type YearOverYearItem = { month: string; thisYear: number; lastYear: number };
+export type YearOverYearResponse = { data: YearOverYearItem[]; hasLastYearData: boolean };
+
+export const getYearOverYear = async (): Promise<YearOverYearResponse> => {
+    const { data } = await API.get("/analytics/year-over-year");
     return data;
 };

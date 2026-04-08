@@ -39,7 +39,7 @@ const StatCard = ({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5}
                         d={changePositive ? "M5 10l7-7m0 0l7 7m-7-7v18" : "M19 14l-7 7m0 0l-7-7m7 7V3"} />
                 </svg>
-                <span>{change} vs last month</span>
+                <span>{change}</span>
             </div>
         )}
     </div>
@@ -76,7 +76,7 @@ const Dashboard = () => {
                     <StatCard
                         title={t("total_balance")}
                         value={loading ? "—" : (stats ? fmt(stats.totalBalance) : "—")}
-                        change={stats?.balanceChange != null ? `${stats.balanceChange > 0 ? "+" : ""}${stats.balanceChange}%` : undefined}
+                        change={stats?.balanceChange != null ? `${stats.balanceChange > 0 ? "+" : ""}${stats.balanceChange}% ${t("vs_last_month")}` : undefined}
                         changePositive={stats?.balanceChange != null ? stats.balanceChange >= 0 : undefined}
                         iconBg="bg-[#f0fdf4]"
                         icon={
@@ -91,7 +91,7 @@ const Dashboard = () => {
                     <StatCard
                         title={t("monthly_spending")}
                         value={loading ? "—" : (stats ? fmt(stats.monthlySpending) : "—")}
-                        change={stats?.spendingChange != null ? `${stats.spendingChange > 0 ? "+" : ""}${stats.spendingChange}%` : undefined}
+                        change={stats?.spendingChange != null ? `${stats.spendingChange > 0 ? "+" : ""}${stats.spendingChange}% ${t("vs_last_month")}` : undefined}
                         changePositive={stats?.spendingChange != null ? stats.spendingChange <= 0 : undefined}
                         iconBg="bg-[#fff1f2]"
                         icon={
@@ -106,7 +106,7 @@ const Dashboard = () => {
                     <StatCard
                         title={t("savings_rate")}
                         value={loading ? "—" : (stats ? `${stats.savingsRate}%` : "—")}
-                        change={stats?.savingsRateChange != null ? `${stats.savingsRateChange > 0 ? "+" : ""}${stats.savingsRateChange}pp` : undefined}
+                        change={stats?.savingsRateChange != null ? `${stats.savingsRateChange > 0 ? "+" : ""}${stats.savingsRateChange}pp ${t("vs_last_month")}` : undefined}
                         changePositive={stats?.savingsRateChange != null ? stats.savingsRateChange >= 0 : undefined}
                         iconBg="bg-[#eff6ff]"
                         icon={

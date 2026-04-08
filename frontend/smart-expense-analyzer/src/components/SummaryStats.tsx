@@ -33,7 +33,7 @@ const StatCard = ({ title, sub, subPositive, subIsText, value }: StatCardProps) 
 const SummaryStats = () => {
     const [stats, setStats] = useState<SummaryStatsData | null>(null);
     const [loading, setLoading] = useState(true);
-    const { fmt } = useAppearance();
+    const { fmt, t } = useAppearance();
 
     useEffect(() => {
         getSummaryStats().then(setStats).catch(() => setStats(null)).finally(() => setLoading(false));
@@ -51,33 +51,34 @@ const SummaryStats = () => {
 
     if (!stats) return null;
 
-    const avgDaily = stats.avgMonthlySpending > 0 ? stats.avgMonthlySpending / 30 : 0;
+    const daysElapsed = new Date().getDate();
+    const avgDaily = stats.avgMonthlySpending > 0 ? stats.avgMonthlySpending / daysElapsed : 0;
 
     return (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
-                title="Avg. Daily Spending"
+                title={t("avg_daily_spending")}
                 value={fmt(avgDaily)}
                 sub="-5.2%"
                 subPositive={false}
             />
             <StatCard
-                title="Top Category"
+                title={t("top_category")}
                 value={stats.highestCategory ?? "—"}
-                sub={stats.highestCategoryAmount > 0 ? `${fmt(stats.highestCategoryAmount)} this month` : "No data"}
+                sub={stats.highestCategoryAmount > 0 ? `${fmt(stats.highestCategoryAmount)} ${t("this_month")}` : t("no_data")}
                 subIsText
             />
             <StatCard
-                title="Transactions"
-                value={stats.totalIncome > 0 ? `${Math.round(stats.totalIncome / (stats.avgMonthlySpending || 1))}` : "—"}
-                sub="+12%"
-                subPositive
+                title={t("transactions")}
+                value={stats.expenseCount > 0 ? `${stats.expenseCount}` : "—"}
+                sub={t("this_month")}
+                subIsText
             />
             <StatCard
-                title="Avg. Transaction"
-                value={stats.avgMonthlySpending > 0 ? fmt(stats.avgMonthlySpending / 30) : "—"}
-                sub="-2.1%"
-                subPositive={false}
+                title={t("avg_transaction")}
+                value={stats.avgTransaction > 0 ? fmt(stats.avgTransaction) : "—"}
+                sub={t("per_expense_month")}
+                subIsText
             />
         </div>
     );
