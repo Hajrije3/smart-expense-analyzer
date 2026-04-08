@@ -7,25 +7,16 @@ export const getCategoryBreakdown = async (req, res) => {
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-        const transactions = await Transaction.find({
-            user: userId,
-            type: "expense",
-            date: { $gte: startOfMonth },
-        });
+        const results = await Transaction.aggregate([
+            { $match: { user: userId, type: "expense", date: { $gte: startOfMonth } } },
+            { $group: { _id: "$category", amount: { $sum: "$amount" } } },
+        ]);
 
-        const categoryMap = {};
-        let total = 0;
-
-        transactions.forEach((tx) => {
-            if (!categoryMap[tx.category]) categoryMap[tx.category] = 0;
-            categoryMap[tx.category] += tx.amount;
-            total += tx.amount;
-        });
-
-        const breakdown = Object.entries(categoryMap).map(([category, amount]) => ({
-            category,
-            amount,
-            percentage: total > 0 ? Math.round((amount / total) * 100) : 0,
+        const total = results.reduce((s, r) => s + r.amount, 0);
+        const breakdown = results.map((r) => ({
+            category: r._id,
+            amount: r.amount,
+            percentage: total > 0 ? Math.round((r.amount / total) * 100) : 0,
         }));
 
         res.json({ breakdown, total });
@@ -44,23 +35,29 @@ export const getWeeklyComparison = async (req, res) => {
         const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
         const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
 
-        const [thisMonthTx, lastMonthTx] = await Promise.all([
-            Transaction.find({ user: userId, type: "expense", date: { $gte: thisMonthStart, $lte: thisMonthEnd } }),
-            Transaction.find({ user: userId, type: "expense", date: { $gte: lastMonthStart, $lte: lastMonthEnd } }),
+        const weekGroup = {
+            $min: [{ $ceil: { $divide: [{ $dayOfMonth: "$date" }, 7] } }, 4],
+        };
+
+        const [thisMonthData, lastMonthData] = await Promise.all([
+            Transaction.aggregate([
+                { $match: { user: userId, type: "expense", date: { $gte: thisMonthStart, $lte: thisMonthEnd } } },
+                { $group: { _id: weekGroup, total: { $sum: "$amount" } } },
+            ]),
+            Transaction.aggregate([
+                { $match: { user: userId, type: "expense", date: { $gte: lastMonthStart, $lte: lastMonthEnd } } },
+                { $group: { _id: weekGroup, total: { $sum: "$amount" } } },
+            ]),
         ]);
 
-        const groupByWeek = (transactions) => {
+        const toWeekMap = (data) => {
             const weeks = { 1: 0, 2: 0, 3: 0, 4: 0 };
-            transactions.forEach((tx) => {
-                const day = new Date(tx.date).getDate();
-                const week = Math.min(Math.ceil(day / 7), 4);
-                weeks[week] += tx.amount;
-            });
+            data.forEach((r) => { weeks[r._id] = r.total; });
             return weeks;
         };
 
-        const thisWeeks = groupByWeek(thisMonthTx);
-        const lastWeeks = groupByWeek(lastMonthTx);
+        const thisWeeks = toWeekMap(thisMonthData);
+        const lastWeeks = toWeekMap(lastMonthData);
 
         const weeks = [1, 2, 3, 4].map((w) => ({
             week: `Week ${w}`,
@@ -81,48 +78,46 @@ export const getSummaryStats = async (req, res) => {
     try {
         const userId = req.user._id;
         const now = new Date();
-
         const trendStart = new Date(now.getFullYear(), now.getMonth() - 6, 1);
-        const allExpenses = await Transaction.find({
-            user: userId,
-            type: "expense",
-            date: { $gte: trendStart },
-        });
+        const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-        const monthTotals = {};
-        allExpenses.forEach((tx) => {
-            const key = new Date(tx.date).toLocaleDateString("en-US", { year: "numeric", month: "short" });
-            if (!monthTotals[key]) monthTotals[key] = 0;
-            monthTotals[key] += tx.amount;
-        });
-        const monthValues = Object.values(monthTotals);
+        const [monthlyExpenses, thisMonthStats] = await Promise.all([
+            Transaction.aggregate([
+                { $match: { user: userId, type: "expense", date: { $gte: trendStart } } },
+                { $group: {
+                    _id: { year: { $year: "$date" }, month: { $month: "$date" } },
+                    total: { $sum: "$amount" },
+                }},
+            ]),
+            Transaction.aggregate([
+                { $match: { user: userId, date: { $gte: thisMonthStart } } },
+                { $group: {
+                    _id: { type: "$type", category: "$category" },
+                    total: { $sum: "$amount" },
+                }},
+            ]),
+        ]);
+
+        const monthValues = monthlyExpenses.map((r) => r.total);
         const avgMonthlySpending = monthValues.length
             ? parseFloat((monthValues.reduce((a, b) => a + b, 0) / monthValues.length).toFixed(2))
             : 0;
 
-        const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-        const thisMonthExpenses = await Transaction.find({
-            user: userId,
-            type: "expense",
-            date: { $gte: thisMonthStart },
+        const categoryMap = {};
+        let totalIncome = 0;
+        let totalExpenses = 0;
+        thisMonthStats.forEach((r) => {
+            if (r._id.type === "expense") {
+                categoryMap[r._id.category] = (categoryMap[r._id.category] || 0) + r.total;
+                totalExpenses += r.total;
+            } else {
+                totalIncome += r.total;
+            }
         });
 
-        const categoryMap = {};
-        thisMonthExpenses.forEach((tx) => {
-            if (!categoryMap[tx.category]) categoryMap[tx.category] = 0;
-            categoryMap[tx.category] += tx.amount;
-        });
         const highestEntry = Object.entries(categoryMap).sort((a, b) => b[1] - a[1])[0];
         const highestCategory = highestEntry ? highestEntry[0] : null;
         const highestCategoryAmount = highestEntry ? parseFloat(highestEntry[1].toFixed(2)) : 0;
-
-        const thisMonthIncome = await Transaction.find({
-            user: userId,
-            type: "income",
-            date: { $gte: thisMonthStart },
-        });
-        const totalIncome = thisMonthIncome.reduce((sum, tx) => sum + tx.amount, 0);
-        const totalExpenses = thisMonthExpenses.reduce((sum, tx) => sum + tx.amount, 0);
         const savingsRate = totalIncome > 0
             ? parseFloat(((totalIncome - totalExpenses) / totalIncome * 100).toFixed(1))
             : 0;
@@ -140,11 +135,13 @@ export const getSpendingTrend = async (req, res) => {
         const months = 7;
         const startDate = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1);
 
-        const transactions = await Transaction.find({
-            user: userId,
-            type: "expense",
-            date: { $gte: startDate },
-        });
+        const results = await Transaction.aggregate([
+            { $match: { user: userId, type: "expense", date: { $gte: startDate } } },
+            { $group: {
+                _id: { year: { $year: "$date" }, month: { $month: "$date" } },
+                spending: { $sum: "$amount" },
+            }},
+        ]);
 
         const monthMap = {};
         for (let i = months - 1; i >= 0; i--) {
@@ -153,9 +150,10 @@ export const getSpendingTrend = async (req, res) => {
             monthMap[key] = 0;
         }
 
-        transactions.forEach((tx) => {
-            const key = new Date(tx.date).toLocaleDateString("en-US", { month: "short" });
-            if (key in monthMap) monthMap[key] += tx.amount;
+        results.forEach((r) => {
+            const d = new Date(r._id.year, r._id.month - 1, 1);
+            const key = d.toLocaleDateString("en-US", { month: "short" });
+            if (key in monthMap) monthMap[key] = r.spending;
         });
 
         const trend = Object.entries(monthMap).map(([month, spending]) => ({
@@ -269,86 +267,116 @@ export const getDashboardStats = async (req, res) => {
     try {
         const userId = req.user._id;
         const now = new Date();
-        const thisMonthStart  = new Date(now.getFullYear(), now.getMonth(), 1);
-        const lastMonthStart  = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        const lastMonthEnd    = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+        const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const lastMonthEnd   = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
 
-        const [allTx, thisMonthTx, lastMonthTx, budgets] = await Promise.all([
-            Transaction.find({ user: userId }),
-            Transaction.find({ user: userId, date: { $gte: thisMonthStart } }),
-            Transaction.find({ user: userId, date: { $gte: lastMonthStart, $lte: lastMonthEnd } }),
-            Budget.find({ user: userId }),
+        const signedAmount = {
+            $cond: [{ $eq: ["$type", "income"] }, "$amount", { $multiply: ["$amount", -1] }],
+        };
+
+        const [balanceAgg, thisMonthAgg, lastMonthAgg, budgets] = await Promise.all([
+            Transaction.aggregate([
+                { $match: { user: userId } },
+                { $group: {
+                    _id: null,
+                    totalBalance: { $sum: signedAmount },
+                    balanceLastMonth: {
+                        $sum: {
+                            $cond: [
+                                { $lte: ["$date", lastMonthEnd] },
+                                signedAmount,
+                                0,
+                            ],
+                        },
+                    },
+                }},
+            ]),
+            Transaction.aggregate([
+                { $match: { user: userId, date: { $gte: thisMonthStart } } },
+                { $group: { _id: "$type", total: { $sum: "$amount" } } },
+            ]),
+            Transaction.aggregate([
+                { $match: { user: userId, date: { $gte: lastMonthStart, $lte: lastMonthEnd } } },
+                { $group: { _id: "$type", total: { $sum: "$amount" } } },
+            ]),
+            Budget.find({ user: userId }).lean(),
         ]);
 
-        const totalBalance = allTx.reduce(
-            (sum, tx) => tx.type === "income" ? sum + tx.amount : sum - tx.amount, 0
-        );
-        const balanceLastMonth = allTx
-            .filter((tx) => new Date(tx.date) <= lastMonthEnd)
-            .reduce((sum, tx) => tx.type === "income" ? sum + tx.amount : sum - tx.amount, 0);
-        const balanceChange = balanceLastMonth !== 0
+        const totalBalance    = balanceAgg[0]?.totalBalance || 0;
+        const balanceLastMonth = balanceAgg[0]?.balanceLastMonth || 0;
+        const balanceChange   = balanceLastMonth !== 0
             ? parseFloat(((totalBalance - balanceLastMonth) / Math.abs(balanceLastMonth) * 100).toFixed(1))
             : null;
 
-        const monthlySpending = thisMonthTx
-            .filter((tx) => tx.type === "expense")
-            .reduce((sum, tx) => sum + tx.amount, 0);
-        const lastMonthSpending = lastMonthTx
-            .filter((tx) => tx.type === "expense")
-            .reduce((sum, tx) => sum + tx.amount, 0);
-        const spendingChange = lastMonthSpending > 0
-            ? parseFloat(((monthlySpending - lastMonthSpending) / lastMonthSpending * 100).toFixed(1))
-            : null;
-
-        const monthlyIncome = thisMonthTx
-            .filter((tx) => tx.type === "income")
-            .reduce((sum, tx) => sum + tx.amount, 0);
-        const savingsRate = monthlyIncome > 0
+        const thisMonth = Object.fromEntries(thisMonthAgg.map((r) => [r._id, r.total]));
+        const monthlySpending = thisMonth["expense"] || 0;
+        const monthlyIncome   = thisMonth["income"] || 0;
+        const savingsRate     = monthlyIncome > 0
             ? parseFloat(((monthlyIncome - monthlySpending) / monthlyIncome * 100).toFixed(1))
             : 0;
 
-        const lastMonthIncome = lastMonthTx
-            .filter((tx) => tx.type === "income")
-            .reduce((sum, tx) => sum + tx.amount, 0);
-        const lastMonthExpenses = lastMonthTx
-            .filter((tx) => tx.type === "expense")
-            .reduce((sum, tx) => sum + tx.amount, 0);
-        const lastSavingsRate = lastMonthIncome > 0
-            ? parseFloat(((lastMonthIncome - lastMonthExpenses) / lastMonthIncome * 100).toFixed(1))
+        const lastMonth = Object.fromEntries(lastMonthAgg.map((r) => [r._id, r.total]));
+        const lastMonthSpending = lastMonth["expense"] || 0;
+        const lastMonthIncome   = lastMonth["income"] || 0;
+        const spendingChange    = lastMonthSpending > 0
+            ? parseFloat(((monthlySpending - lastMonthSpending) / lastMonthSpending * 100).toFixed(1))
+            : null;
+        const lastSavingsRate   = lastMonthIncome > 0
+            ? parseFloat(((lastMonthIncome - lastMonthSpending) / lastMonthIncome * 100).toFixed(1))
             : null;
         const savingsRateChange = lastSavingsRate !== null
             ? parseFloat((savingsRate - lastSavingsRate).toFixed(1))
             : null;
 
+        // Reduce N budget queries to at most 3 (one per period type)
         const totalBudget = budgets.reduce((s, b) => s + b.amount, 0);
         let totalSpent = 0;
         if (budgets.length > 0) {
+            const periodGroups = {};
+            budgets.forEach((b) => {
+                if (!periodGroups[b.period]) periodGroups[b.period] = [];
+                periodGroups[b.period].push(b);
+            });
+
             const spentResults = await Promise.all(
-                budgets.map((b) => {
+                Object.entries(periodGroups).map(async ([period, periodBudgets]) => {
                     let start;
-                    if (b.period === "weekly") {
+                    if (period === "weekly") {
                         start = new Date(now);
                         start.setDate(now.getDate() - now.getDay());
                         start.setHours(0, 0, 0, 0);
-                    } else if (b.period === "yearly") {
+                    } else if (period === "yearly") {
                         start = new Date(now.getFullYear(), 0, 1);
                     } else {
                         start = new Date(now.getFullYear(), now.getMonth(), 1);
                     }
-                    return Transaction.aggregate([
-                        { $match: { user: userId, type: "expense", category: b.category, date: { $gte: start } } },
-                        { $group: { _id: null, spent: { $sum: "$amount" } } },
+
+                    const hasAll = periodBudgets.some((b) => b.category === "all");
+                    const categories = periodBudgets.filter((b) => b.category !== "all").map((b) => b.category);
+                    const matchFilter = { user: userId, type: "expense", date: { $gte: start } };
+                    if (!hasAll && categories.length > 0) matchFilter.category = { $in: categories };
+
+                    const results = await Transaction.aggregate([
+                        { $match: matchFilter },
+                        { $group: { _id: "$category", spent: { $sum: "$amount" } } },
                     ]);
+
+                    const categorySpending = Object.fromEntries(results.map((r) => [r._id, r.spent]));
+                    const periodTotal = results.reduce((s, r) => s + r.spent, 0);
+
+                    return periodBudgets.reduce((s, b) =>
+                        s + (b.category === "all" ? periodTotal : (categorySpending[b.category] || 0)), 0);
                 })
             );
-            totalSpent = spentResults.reduce((s, r) => s + (r[0]?.spent || 0), 0);
+            totalSpent = spentResults.reduce((s, r) => s + r, 0);
         }
         const budgetStatus = totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0;
 
         res.json({
-            totalBalance:     parseFloat(totalBalance.toFixed(2)),
+            totalBalance:    parseFloat(totalBalance.toFixed(2)),
             balanceChange,
-            monthlySpending:  parseFloat(monthlySpending.toFixed(2)),
+            monthlySpending: parseFloat(monthlySpending.toFixed(2)),
             spendingChange,
             savingsRate,
             savingsRateChange,
@@ -434,32 +462,27 @@ export const getAnalytics = async (req, res) => {
                 startDate.setDate(now.getDate() - 7);
         }
 
-        const transactions = await Transaction.find({
-            user: userId,
-            date: { $gte: startDate },
-        });
+        const groupId = range === "7d"
+            ? { year: { $year: "$date" }, month: { $month: "$date" }, day: { $dayOfMonth: "$date" } }
+            : { year: { $year: "$date" }, month: { $month: "$date" } };
+
+        const results = await Transaction.aggregate([
+            { $match: { user: userId, date: { $gte: startDate } } },
+            { $group: { _id: { ...groupId, type: "$type" }, total: { $sum: "$amount" } } },
+        ]);
 
         const resultMap = {};
-
-        transactions.forEach((tx) => {
-            const date = new Date(tx.date);
+        results.forEach((r) => {
+            const date = range === "7d"
+                ? new Date(r._id.year, r._id.month - 1, r._id.day)
+                : new Date(r._id.year, r._id.month - 1, 1);
             const key = date.toLocaleDateString("en-US", {
                 month: "short",
                 day: range === "7d" ? "numeric" : undefined,
             });
-
-            if (!resultMap[key]) {
-                resultMap[key] = {
-                    income: 0,
-                    expense: 0,
-                };
-            }
-
-            if (tx.type === "income") {
-                resultMap[key].income += tx.amount;
-            } else {
-                resultMap[key].expense += tx.amount;
-            }
+            if (!resultMap[key]) resultMap[key] = { income: 0, expense: 0 };
+            if (r._id.type === "income") resultMap[key].income += r.total;
+            else resultMap[key].expense += r.total;
         });
 
         const analytics = Object.entries(resultMap).map(([label, data]) => ({

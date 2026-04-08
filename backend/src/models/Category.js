@@ -7,4 +7,6 @@ const categorySchema = new mongoose.Schema({
     color: { type: String, default: "#6b7280" },
 }, { timestamps: true });
 
+categorySchema.index({ user: 1 });
+
 export default mongoose.model("Category", categorySchema);

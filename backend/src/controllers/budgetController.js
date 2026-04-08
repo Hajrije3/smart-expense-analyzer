@@ -52,32 +52,46 @@ export const getBudgets = async (req, res) => {
   try {
     const budgets = await Budget.find({ user: req.user._id }).sort({ createdAt: -1 });
 
-    const budgetsWithSpending = await Promise.all(
-      budgets.map(async (budget) => {
-        const { start, end } = getPeriodRange(budget.period);
+    if (budgets.length === 0) return res.json([]);
 
-        const filter = {
-          user: req.user._id,
-          type: "expense",
-          date: { $gte: start, $lte: end },
-        };
+    // Group budgets by period and do one aggregation per period type (max 3 queries)
+    const periodGroups = {};
+    budgets.forEach((b) => {
+      if (!periodGroups[b.period]) periodGroups[b.period] = [];
+      periodGroups[b.period].push(b);
+    });
 
-        if (budget.category !== "all") {
-          filter.category = budget.category;
-        }
+    const spentByBudgetId = {};
+    await Promise.all(
+      Object.entries(periodGroups).map(async ([period, periodBudgets]) => {
+        const { start, end } = getPeriodRange(period);
+        const hasAll = periodBudgets.some((b) => b.category === "all");
+        const categories = periodBudgets.filter((b) => b.category !== "all").map((b) => b.category);
 
-        const result = await Transaction.aggregate([
-          { $match: filter },
-          { $group: { _id: null, spent: { $sum: "$amount" } } },
+        const matchFilter = { user: req.user._id, type: "expense", date: { $gte: start, $lte: end } };
+        if (!hasAll && categories.length > 0) matchFilter.category = { $in: categories };
+
+        const results = await Transaction.aggregate([
+          { $match: matchFilter },
+          { $group: { _id: "$category", spent: { $sum: "$amount" } } },
         ]);
 
-        const spent = result[0]?.spent || 0;
-        const remaining = budget.amount - spent;
-        const percentUsed = budget.amount > 0 ? Math.round((spent / budget.amount) * 100) : 0;
+        const categorySpending = Object.fromEntries(results.map((r) => [r._id, r.spent]));
+        const periodTotal = results.reduce((s, r) => s + r.spent, 0);
 
-        return { ...budget.toObject(), spent, remaining, percentUsed };
+        periodBudgets.forEach((b) => {
+          spentByBudgetId[b._id.toString()] =
+            b.category === "all" ? periodTotal : (categorySpending[b.category] || 0);
+        });
       })
     );
+
+    const budgetsWithSpending = budgets.map((budget) => {
+      const spent = spentByBudgetId[budget._id.toString()] || 0;
+      const remaining = budget.amount - spent;
+      const percentUsed = budget.amount > 0 ? Math.round((spent / budget.amount) * 100) : 0;
+      return { ...budget.toObject(), spent, remaining, percentUsed };
+    });
 
     res.json(budgetsWithSpending);
   } catch (err) {

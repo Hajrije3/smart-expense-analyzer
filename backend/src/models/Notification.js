@@ -8,4 +8,6 @@ const notificationSchema = new mongoose.Schema({
     read:    { type: Boolean, default: false },
 }, { timestamps: true });
 
+notificationSchema.index({ user: 1 });
+
 export default mongoose.model("Notification", notificationSchema);
