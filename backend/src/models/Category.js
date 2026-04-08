@@ -5,7 +5,7 @@ const categorySchema = new mongoose.Schema({
     name:  { type: String, required: true },
     icon:  { type: String, default: "📦" },
     color: { type: String, default: "#6b7280" },
-}, { timestamps: true });
+}, { timestamps: true, bufferCommands: false });
 
 categorySchema.index({ user: 1 });
 

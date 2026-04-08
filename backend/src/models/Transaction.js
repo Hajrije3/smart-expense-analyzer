@@ -27,7 +27,7 @@ const transactionSchema = new mongoose.Schema({
         type: String,
         default: "",
     },
-}, { timestamps: true });
+}, { timestamps: true, bufferCommands: false });
 
 transactionSchema.index({ user: 1, date: -1 });
 transactionSchema.index({ user: 1, type: 1, date: -1 });

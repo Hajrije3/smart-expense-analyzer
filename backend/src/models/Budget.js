@@ -21,7 +21,7 @@ const budgetSchema = new mongoose.Schema(
       default: "monthly",
     },
   },
-  { timestamps: true }
+  { timestamps: true, bufferCommands: false }
 );
 
 budgetSchema.index({ user: 1, category: 1, period: 1 }, { unique: true });
