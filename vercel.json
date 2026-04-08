@@ -1,5 +1,8 @@
 {
   "buildCommand": "npm install --prefix frontend/smart-expense-analyzer && npm run build --prefix frontend/smart-expense-analyzer",
   "outputDirectory": "frontend/smart-expense-analyzer/dist",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
