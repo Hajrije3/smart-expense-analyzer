@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import mongoose from "mongoose";
 import dotenv from "dotenv";
 import authRoutes from "./src/routes/authRoutes.js";
 import userRoutes from "./src/routes/userRoutes.js";
@@ -35,6 +36,27 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// DB connection middleware — runs before every route using the same mongoose instance as models
+let connectPromise = null;
+app.use(async (req, res, next) => {
+    if (mongoose.connection.readyState === 1) return next();
+    if (!process.env.MONGO_URI) {
+        return res.status(500).json({ message: "MONGO_URI is not configured" });
+    }
+    try {
+        if (!connectPromise) {
+            connectPromise = mongoose
+                .connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000 })
+                .catch((err) => { connectPromise = null; throw err; });
+        }
+        await connectPromise;
+        next();
+    } catch (err) {
+        console.error("[DB] Connection failed:", err.message);
+        res.status(500).json({ message: "DB connection failed: " + err.message });
+    }
+});
 
 app.get("/", (req, res) => res.send("API is running..."));
 
