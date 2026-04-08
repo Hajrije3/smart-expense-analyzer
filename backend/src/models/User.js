@@ -19,6 +19,8 @@ const userSchema = new mongoose.Schema({
         pushNotifications:  { type: Boolean, default: true },
         budgetAlerts:       { type: Boolean, default: true },
     },
+    resetPasswordToken:   { type: String },
+    resetPasswordExpires: { type: Date },
 }, { timestamps: true, bufferCommands: false });
 
 export default mongoose.model("User", userSchema);

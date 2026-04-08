@@ -56,6 +56,42 @@ export const sendBudgetAlertEmail = async ({ to, name, category, spent, limit, p
     }
 };
 
+export const sendPasswordResetEmail = async ({ to, name, resetUrl }) => {
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        console.warn("[Email] EMAIL_USER or EMAIL_PASS not set — skipping password reset email");
+        return;
+    }
+    try {
+        const transporter = createTransporter();
+        await transporter.sendMail({
+            from: `"ExpenseAI" <${process.env.EMAIL_USER}>`,
+            to,
+            subject: "Reset your ExpenseAI password",
+            html: `
+                <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;background:#f9fafb;border-radius:12px;">
+                    <div style="background:#22c55e;border-radius:8px;padding:16px 20px;margin-bottom:20px;">
+                        <h2 style="color:#fff;margin:0;font-size:18px;">Password Reset</h2>
+                    </div>
+                    <p style="color:#374151;font-size:15px;">Hi <strong>${name}</strong>,</p>
+                    <p style="color:#374151;font-size:15px;">
+                        We received a request to reset your password. Click the button below to choose a new one.
+                        This link expires in <strong>1 hour</strong>.
+                    </p>
+                    <a href="${resetUrl}" style="display:inline-block;margin:16px 0;padding:12px 28px;background:#22c55e;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;">
+                        Reset Password
+                    </a>
+                    <p style="color:#6b7280;font-size:13px;">
+                        If you didn't request this, you can safely ignore this email.
+                    </p>
+                    <p style="color:#9ca3af;font-size:12px;margin-top:24px;">— ExpenseAI Team</p>
+                </div>
+            `,
+        });
+    } catch (err) {
+        console.error("[Email] Failed to send password reset email:", err.message);
+    }
+};
+
 export const sendWelcomeEmail = async ({ to, name }) => {
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) return;
     try {

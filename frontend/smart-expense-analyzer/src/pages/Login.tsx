@@ -146,7 +146,10 @@ const Login = () => {
                                 />
                                 <span className="text-sm text-gray-700">Remember me</span>
                             </label>
-                            <span className="text-sm font-semibold text-gray-800 cursor-pointer hover:text-[#22c55e] transition-colors">
+                            <span
+                                className="text-sm font-semibold text-gray-800 cursor-pointer hover:text-[#22c55e] transition-colors"
+                                onClick={() => navigate("/forgot-password")}
+                            >
                                 Forgot password?
                             </span>
                         </div>
