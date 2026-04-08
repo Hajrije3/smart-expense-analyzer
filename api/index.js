@@ -1,26 +1,37 @@
 import mongoose from "mongoose";
 import app from "../backend/app.js";
 
-let isConnected = false;
+let connectPromise = null;
+
+async function connectDB() {
+    if (mongoose.connection.readyState === 1) return;
+
+    if (!process.env.MONGO_URI) {
+        throw new Error("MONGO_URI environment variable is not set");
+    }
+
+    if (!connectPromise) {
+        connectPromise = mongoose
+            .connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000 })
+            .catch((err) => {
+                connectPromise = null;
+                throw err;
+            });
+    }
+
+    await connectPromise;
+
+    if (mongoose.connection.readyState !== 1) {
+        throw new Error(`DB connected but readyState is ${mongoose.connection.readyState}`);
+    }
+}
 
 export default async function handler(req, res) {
-    if (!process.env.MONGO_URI) {
-        return res.status(500).json({ message: "MONGO_URI is not set in environment variables" });
+    try {
+        await connectDB();
+    } catch (err) {
+        console.error("[DB] Error:", err.message);
+        return res.status(500).json({ message: err.message });
     }
-
-    if (!isConnected || mongoose.connection.readyState !== 1) {
-        try {
-            await mongoose.connect(process.env.MONGO_URI, {
-                serverSelectionTimeoutMS: 8000,
-            });
-            isConnected = true;
-            console.log("[DB] Connected successfully");
-        } catch (err) {
-            isConnected = false;
-            console.error("[DB] Connection failed:", err.message);
-            return res.status(500).json({ message: "DB connection failed: " + err.message });
-        }
-    }
-
     return app(req, res);
 }
