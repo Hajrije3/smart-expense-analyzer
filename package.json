@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "start": "node backend/server.js",
     "dev:backend": "node backend/server.js"
   },
   "dependencies": {
