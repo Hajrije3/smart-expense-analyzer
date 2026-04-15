@@ -20,6 +20,7 @@ const allowedOrigins = [
     "https://smart-expense-analyzer-green.vercel.app",
     "http://localhost:5173",
     "http://localhost:3000",
+    ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
 ];
 
 app.use(cors({
